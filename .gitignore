@@ -147,3 +147,24 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# --- CREDENCIALES Y SECRETOS (GCP / BigQuery) ---
+credentials.json
+*-key.json
+*service-account*.json
+
+# --- ARCHIVOS DEL SISTEMA OPERATIVO ---
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+
+# --- CONFIGURACIÓN DE IDEs Y EDITORES ---
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
