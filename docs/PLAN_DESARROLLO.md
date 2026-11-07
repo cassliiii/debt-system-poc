@@ -29,8 +29,9 @@ $$\text{Procesos de Negocio} \longrightarrow \text{Sistemas de Información (SI)
 Para una demo gratuita y de pocos días, **no nos conectamos a los Oracle/PostgreSQL on-premise reales de las áreas**. En su lugar:
 
 * Las **bases de datos de 2 áreas se emulan con tablas en BigQuery** (`BD_Area1`, `BD_Area2`), creadas y administradas por **Rai** directamente en el entorno de GCP.
-* Los **CSV que hoy están en `samples/` son solo de referencia/formato** (muestran el esquema esperado: `dni, nombre, monto_deuda, concepto`), no son el dataset final de la demo. Para la presentación se preparará un set de CSV de ejemplo más realista (con DNIs repetidos entre áreas para que la consolidación se note).
+* Los **CSV que hoy están en `samples/` son solo de referencia/formato** (muestran el esquema esperado: `dni, nombre, num_papeleta, tipo_monto, monto, concepto`), no son el dataset final de la demo. Para la presentación se preparará un set de CSV de ejemplo más realista (con DNIs repetidos entre áreas para que la consolidación se note).
 * El punto de entrada real de esos CSV en la demo **no es `curl`/Postman**, sino la **vista de carga (Data Entry) que construye Freddy** — es decir, el camino completo del dato en la demo es: *CSV → formulario web (Freddy) → API backend (Lisseth) → ingesta/validación (Rai) → BigQuery*.
+* **Cada área puede enviar columnas adicionales propias** (información interna que ellas manejan, ej. `codigo_interno_area`, `observaciones`, `sede`, `fecha_infraccion`), en cualquier orden. La ingesta solo toma las columnas que necesita por **nombre de cabecera**, nunca por posición, y descarta el resto — ver 4.3.1.
 
 ---
 
@@ -49,15 +50,16 @@ La frontera entre Lisseth y Rai: **Lisseth es dueña del endpoint y su contrato*
 ## 3. Plan de Actividades
 
 ### 3.1. Rai — Ingesta y Pipeline de Datos (Data Engineering)
-- [x] Diseñar el esquema de datos (`dni`, `nombre`, `monto_deuda`, `concepto`, `fecha_carga`).
+- [x] Diseñar el esquema de datos: `dni`, `nombre`, `num_papeleta`, `tipo_monto` (`BASE`/`INTERES`), `monto`, `concepto`, `fecha_carga` — revisado y corregido para reflejar el punto 1.2 (deuda base vs. intereses), no solo suma entre áreas.
 - [x] Crear el dataset `ds_sistema_deudas` en BigQuery (entorno GCP real, no local).
-- [x] Crear las tablas que emulan las BD de las 2 áreas de prueba: `BD_Area1`, `BD_Area2` (`sql/01_create_tables.sql`).
-- [x] Crear la vista de consolidación `VW_Reporte_Deuda` (`sql/02_create_views_sp.sql`): `UNION ALL` entre áreas + `SUM(monto_deuda)` por DNI.
-- [x] Definir reglas de calidad de datos de ingesta: DNI de 8 dígitos numéricos, `monto_deuda` numérico (`middlewares/validator.js`).
+- [x] Crear las tablas que emulan las BD de las 2 áreas de prueba: `BD_Area1`, `BD_Area2`, particionadas por `DATE(fecha_carga)` (`sql/02_create_tables.sql`).
+- [x] Sembrar datos base de ejemplo (`sql/03_insert_info.sql`) que simulan lo que ya estaría cargado en el sistema formal de cada área antes de la demo.
+- [x] Crear la vista de consolidación `VW_Reporte_Deuda` (`sql/04_create_view.sql`): `UNION ALL` entre áreas + `deuda_base_total`, `interes_total`, `deuda_total` por DNI, con el área de origen en el detalle.
+- [x] Definir reglas de calidad de datos de ingesta: DNI de 8 dígitos, `num_papeleta` no vacío, `tipo_monto` en (`BASE`,`INTERES`), `monto` numérico (`middlewares/validator.js`).
+- [x] Hacer la ingesta tolerante a **columnas adicionales propias de cada área**: se leen por nombre de cabecera, no por posición, y las no requeridas se descartan (`debtController.js`).
 - [ ] Preparar los **CSV de ejemplo definitivos para la demo** (reemplazando/complementando los de referencia en `samples/`), con DNIs compartidos entre `area1` y `area2` para que la suma consolidada sea visible.
-- [ ] Decidir y documentar si se incorpora la distinción "deuda base / interés" (columna `tipo_monto`) o si la demo se queda en consolidación simple entre áreas (ver 1.4 y 4.5).
-- [ ] Aprovisionar el entorno GCP: dataset, permisos IAM de la cuenta de servicio de Cloud Run (`roles/bigquery.dataEditor`, `roles/bigquery.jobUser`), y desplegar el servicio en Cloud Run dentro del free tier.
-- [ ] Validar en el entorno real (no local) que la ingesta vía API efectivamente llega a las tablas de BigQuery.
+- [ ] Dar los roles IAM (`roles/bigquery.dataEditor`, `roles/bigquery.jobUser`) a la cuenta de servicio por defecto de Cloud Run (`<PROJECT_NUMBER>-compute@developer.gserviceaccount.com`) — necesario antes de que el deploy funcione en producción.
+- [ ] Desplegar el servicio en Cloud Run dentro del free tier y validar que la ingesta vía API, ya en la nube, llega a las tablas de BigQuery.
 
 ### 3.2. Lisseth — Lógica de Backend
 - [x] Definir y construir los endpoints REST (`backend/src/routes/debtRoutes.js`):
@@ -67,18 +69,18 @@ La frontera entre Lisseth y Rai: **Lisseth es dueña del endpoint y su contrato*
 - [x] Middleware de carga de archivos (`multer`, memoria, límite 5 MB, solo `.csv`).
 - [x] Conexión a BigQuery desde el backend (`config/bigquery.js`) e inserción de filas validadas.
 - [x] Manejo de errores HTTP (400 por validación, 404 sin resultados, 500 error interno) con mensajes claros para que el frontend de Freddy los pueda mostrar.
+- [x] Manejador de errores central en `app.js` para que un error de `multer` (archivo no-CSV, > 5 MB) devuelva JSON y no un stack trace HTML.
+- [x] Parseo de CSV por nombre de columna (no por posición), tolerante a columnas extra y a comas dentro de valores entre comillas.
 - [ ] Documentar el contrato de cada endpoint (request/response de ejemplo) para que Freddy pueda integrarlo sin depender de leer el controller.
 - [ ] Revisar junto con Rai la separación de responsabilidades dentro de `debtController.js` (hoy mezcla parseo de CSV + reglas de negocio + acceso a BigQuery).
-- [ ] Agregar manejo explícito de errores de `multer` (archivo no-CSV, archivo > 5 MB) con mensajes consistentes con el resto de la API.
 
 ### 3.3. Freddy — Vistas (Frontend)
-- [ ] Construir el **Portal Web Unificado** con dos vistas, dentro de la misma app:
-  1. **Data Entry:** formulario para seleccionar área (`BD_Area1` / `BD_Area2`), adjuntar CSV y enviarlo a `POST /api/debt/upload`. Debe mostrar éxito (`totalRegistros`) o el detalle de errores de validación fila por fila si el backend responde 400.
-  2. **Atención al Ciudadano:** campo de DNI que consulta `GET /api/debt/consulta/:dni` y muestra `deuda_total` y el desglose (`detalle_deudas`) de forma legible para el operador.
-- [ ] Definir cómo se sirve el frontend: opción recomendada, una carpeta `backend/public/` servida por `express.static` desde el mismo Cloud Run (sin infraestructura ni costo adicional).
-- [ ] Manejar estados de carga/error/éxito en ambas vistas (spinner, mensajes de alerta, mensajes de "ciudadano sin registros").
-- [ ] Coordinar con Lisseth el contrato exacto de cada endpoint antes de integrar.
-- [ ] Dejar el flujo de **Caso 1 (CSV inválido)**, **Caso 2 (ingesta exitosa)** y **Caso 3 (consulta unificada)** operables de punta a punta desde la UI, ya que la demo en vivo se hará **desde esta vista**, no desde Postman/curl.
+- [x] Construir el **Portal Web Unificado** con tres pantallas: landing con navegación (`index.html`), **Data Entry** (`data-entry.html`) y **Atención al Ciudadano** (`consulta.html`), en `frontend/` (carpeta a nivel de raíz, separada de `backend/`).
+- [x] Data Entry: formulario de área + CSV contra `POST /api/debt/upload`, con mensaje de éxito (`totalRegistros`) o errores de validación fila por fila, y protección contra doble envío.
+- [x] Atención al Ciudadano: consulta por DNI contra `GET /api/debt/consulta/:dni`, con desglose `deuda_base_total` / `interes_total` / `deuda_total` y tabla de detalle con badges `BASE`/`INTERES`.
+- [x] Diseño visual corporativo (topbar institucional, paleta consistente) en `frontend/styles.css`.
+- [ ] Coordinar con Lisseth el contrato exacto de cada endpoint antes de futuros cambios.
+- [x] Flujo de **Caso 1 (CSV inválido)**, **Caso 2 (ingesta exitosa)** y **Caso 3 (consulta unificada)** operable de punta a punta desde la UI, probado localmente contra BigQuery real.
 
 ### 3.4. Transversal (los tres)
 - [ ] Ensayo completo de la demo contra la URL pública de Cloud Run (no en local) antes de la presentación.
@@ -107,23 +109,47 @@ Operador en Vista "Atención al Ciudadano" (Freddy)
 ```
 
 ### 4.3. Componentes implementados hoy
-1. **API REST (`backend/`, Express 5, Cloud Run)** — Lisseth.
+1. **API REST (`backend/`, Express 5)** — Lisseth.
 2. **Validación de filas (`middlewares/validator.js`)** — Lisseth/Rai.
-3. **Dataset y tablas BigQuery (`sql/01_create_tables.sql`)** — Rai.
-4. **Vista de consolidación `VW_Reporte_Deuda` (`sql/02_create_views_sp.sql`)** — Rai.
-5. **Infraestructura (`Dockerfile`, Cloud Run)** — Rai.
-6. **CI (`.github/workflows/backend-ci.yml`)** — valida que el backend cargue en cada push/PR.
-7. **Frontend (`backend/public/`)** — pendiente, a cargo de Freddy (ver 3.3).
+3. **Dataset y tablas BigQuery** (`sql/01_create_dataset.sql`, `sql/02_create_tables.sql`), particionadas por `fecha_carga` — Rai.
+4. **Datos sembrados** (`sql/03_insert_info.sql`) — Rai.
+5. **Vista de consolidación `VW_Reporte_Deuda`** (`sql/04_create_view.sql`) — Rai.
+6. **Infraestructura (`Dockerfile`, Cloud Run)** — Rai.
+7. **CI (`.github/workflows/backend-ci.yml`)** — valida que el backend cargue en cada push/PR.
+8. **Frontend (`frontend/`)** — Freddy. Servido como estáticos por el mismo Express (`backend/src/app.js`), sin build step ni framework.
+
+#### 4.3.1. Contrato del CSV de ingesta
+El backend requiere **estas columnas por nombre** (sin importar su posición ni mayúsculas/minúsculas):
+
+| Columna | Descripción |
+|---|---|
+| `dni` | 8 dígitos numéricos |
+| `nombre` | Nombre completo del ciudadano |
+| `num_papeleta` | Identificador de la infracción/deuda (trazabilidad, evita doble conteo) |
+| `tipo_monto` | `BASE` o `INTERES` |
+| `monto` | Numérico |
+| `concepto` | Texto libre |
+
+Cada área puede agregar **cualquier columna adicional propia** (ej. `codigo_interno_area`, `observaciones`, `sede`, `fecha_infraccion`) en cualquier posición — se ignoran automáticamente. Si falta alguna columna requerida, el backend rechaza el archivo completo con `400` y el detalle de cuáles faltan, antes de insertar nada.
 
 ### 4.4. Despliegue en Free Tier (a cargo de Rai)
 
 ```bash
-# 1. Crear dataset y tablas/vista (una sola vez, en el proyecto GCP real)
-bq mk --location=US ds_sistema_deudas
-bq query --use_legacy_sql=false < sql/01_create_tables.sql
-bq query --use_legacy_sql=false < sql/02_create_views_sp.sql
+# 1. Crear dataset, tablas, datos de ejemplo y vista (una sola vez, en el proyecto GCP real)
+bq query --use_legacy_sql=false < sql/01_create_dataset.sql
+bq query --use_legacy_sql=false < sql/02_create_tables.sql
+bq query --use_legacy_sql=false < sql/03_insert_info.sql
+bq query --use_legacy_sql=false < sql/04_create_view.sql
 
-# 2. Desplegar a Cloud Run desde el código fuente
+# 2. Dar permisos a la cuenta de servicio de Cloud Run (una sola vez)
+gcloud projects add-iam-policy-binding <tu-proyecto> \
+  --member="serviceAccount:<PROJECT_NUMBER>-compute@developer.gserviceaccount.com" \
+  --role="roles/bigquery.dataEditor"
+gcloud projects add-iam-policy-binding <tu-proyecto> \
+  --member="serviceAccount:<PROJECT_NUMBER>-compute@developer.gserviceaccount.com" \
+  --role="roles/bigquery.jobUser"
+
+# 3. Desplegar a Cloud Run desde el código fuente
 gcloud run deploy debt-system-poc \
   --source . \
   --region us-central1 \
@@ -133,19 +159,19 @@ gcloud run deploy debt-system-poc \
   --set-env-vars GCP_PROJECT_ID=<tu-proyecto>,BQ_DATASET=ds_sistema_deudas
 ```
 
-Condiciones para quedarse en el free tier: región `us-central1`/`us-east1`/`us-west1`, `min-instances=0` (escala a cero), y permisos IAM (`roles/bigquery.dataEditor`, `roles/bigquery.jobUser`) sobre la cuenta de servicio por defecto de Cloud Run — no se necesita archivo de credenciales.
+Condiciones para quedarse en el free tier: región `us-central1`/`us-east1`/`us-west1`, `min-instances=0` (escala a cero), y los permisos IAM del paso 2 — no se necesita archivo de credenciales, Cloud Run usa la cuenta de servicio por defecto.
 
-### 4.5. Mejora opcional: distinguir "deuda base" de "intereses"
-Si el equipo decide reflejar literalmente el punto 1.2 (y no solo la suma entre áreas), Rai puede agregar una columna `tipo_monto` (`BASE`/`INTERES`) a las tablas y a la vista (`SUM(IF(tipo_monto='BASE', ...))`, `SUM(IF(tipo_monto='INTERES', ...))`). Es un cambio de esquema, no de arquitectura, y no bloquea el resto del plan.
+### 4.5. Distinción "deuda base" vs. "intereses" (ya implementado)
+El esquema original solo sumaba `monto_deuda` entre áreas, sin reflejar el punto 1.2. Se corrigió agregando `tipo_monto` (`BASE`/`INTERES`) a las tablas y la vista expone `deuda_base_total` e `interes_total` por separado además del `deuda_total`. Ver 4.3.1 para el contrato de columnas.
 
 ---
 
 ## 5. Guía para la Demo
 
 ### 5.1. Estructura de la Demostración en Vivo (desde la vista de Freddy)
-* **Caso 1 — Validación (rechazo de datos basura):** en la vista Data Entry, subir un CSV con DNI de 7 dígitos o monto alfanumérico (formato de `samples/invalid_format.csv`). La vista debe mostrar el error de validación devuelto por el backend, sin insertar nada en BigQuery.
+* **Caso 1 — Validación (rechazo de datos basura):** en la vista Data Entry, subir un CSV con DNI de 7 dígitos, `tipo_monto` inválido o monto alfanumérico (formato de `samples/invalid_format.csv` / `invalid_format_area2.csv`). La vista debe mostrar el error de validación devuelto por el backend, sin insertar nada en BigQuery.
 * **Caso 2 — Ingesta exitosa:** subir, desde la misma vista, los CSV de ejemplo definitivos (preparados por Rai) para `BD_Area1` y `BD_Area2`. Mostrar confirmación en pantalla y, opcionalmente, las filas nuevas en la consola de BigQuery.
-* **Caso 3 — Consulta unificada por DNI:** cambiar a la vista Atención al Ciudadano, ingresar un DNI presente en ambas áreas y mostrar `deuda_total` + desglose por concepto.
+* **Caso 3 — Consulta unificada por DNI:** cambiar a la vista Atención al Ciudadano y consultar un DNI **sembrado desde antes de la demo** (ej. `10000001`), no uno recién subido en el Caso 2 — BigQuery puede tardar unos segundos en reflejar un `insert` reciente (streaming buffer), y usar un DNI ya consolidado evita ese riesgo en vivo. Mostrar `deuda_base_total`, `interes_total`, `deuda_total` y el detalle por área/concepto.
 
 ### 5.2. Puntos clave para la sustentación técnica
 1. **Pragmatismo:** *serverless* (Cloud Run + BigQuery) permite una API funcional en días, sin tocar los sistemas on-premise de las 10 áreas.
@@ -159,8 +185,10 @@ Si el equipo decide reflejar literalmente el punto 1.2 (y no solo la suma entre 
 
 ## 6. Checklist de pendientes antes de la demo
 
-- [ ] Rai: aprovisionar el entorno GCP real (dataset, tablas, vista, IAM, despliegue Cloud Run).
-- [ ] Rai: preparar los CSV de ejemplo definitivos (no los de `samples/`, que son solo de referencia).
+- [x] Rai: dataset, tablas particionadas, datos sembrados y vista creados en el proyecto GCP real.
+- [x] Freddy: vistas Data Entry y Atención al Ciudadano construidas (`frontend/`), probadas localmente contra BigQuery real.
+- [x] Lisseth/Rai: ingesta robusta a columnas extra por área y a errores de archivo (multer).
+- [ ] Rai: dar permisos IAM a la cuenta de servicio de Cloud Run y desplegar (`gcloud run deploy`, ver 4.4).
+- [ ] Rai: preparar los CSV de ejemplo definitivos para la demo en vivo (no los de `samples/`, que son solo de referencia).
 - [ ] Lisseth: documentar el contrato de los 3 endpoints para Freddy.
-- [ ] Freddy: construir y desplegar las vistas Data Entry y Atención al Ciudadano.
 - [ ] Los tres: ensayo completo de los 3 casos de la sección 5.1 desde la URL pública de Cloud Run.

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Atención al Ciudadano - Sistema de Deudas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo">SD</div>
+    <div class="titles">
+      <div class="org">Oficina de Atención al Ciudadano</div>
+      <div class="system">Sistema Integrado de Reporte de Deudas</div>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <h1>Atención al Ciudadano</h1>
+      <p class="subtitle">Ingresa el DNI para consultar la deuda consolidada entre áreas.</p>
+
+      <form id="consultaForm">
+        <label for="dni">DNI (8 dígitos)</label>
+        <input type="text" id="dni" name="dni" maxlength="8" placeholder="Ej: 10000001" required />
+
+        <div class="btn-row">
+          <button type="submit" class="btn">Consultar</button>
+        </div>
+      </form>
+
+      <div id="result"></div>
+
+      <a class="back-link" href="index.html">&larr; Volver al inicio</a>
+    </div>
+  </main>
+
+  <script>
+    const form = document.getElementById('consultaForm');
+    const resultDiv = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const dni = document.getElementById('dni').value.trim();
+      resultDiv.className = 'result';
+      resultDiv.textContent = 'Consultando...';
+
+      try {
+        const res = await fetch(`/api/debt/consulta/${dni}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          resultDiv.className = 'result error';
+          resultDiv.textContent = `❌ ${data.message || data.error}`;
+          return;
+        }
+
+        const r = data.data;
+        const filas = (r.detalle || []).map(d => `
+          <tr>
+            <td>${d.area}</td>
+            <td>${d.num_papeleta}</td>
+            <td><span class="badge ${d.tipo_monto === 'BASE' ? 'base' : 'interes'}">${d.tipo_monto}</span></td>
+            <td>${d.concepto}</td>
+            <td>S/ ${Number(d.monto).toFixed(2)}</td>
+          </tr>
+        `).join('');
+
+        resultDiv.className = 'result ok';
+        resultDiv.innerHTML = `
+          <strong>${r.nombre}</strong> — DNI ${r.dni}
+          <div class="totales">
+            <div class="pill"><span>Deuda Base</span><b>S/ ${Number(r.deuda_base_total).toFixed(2)}</b></div>
+            <div class="pill"><span>Intereses</span><b>S/ ${Number(r.interes_total).toFixed(2)}</b></div>
+            <div class="pill total"><span>Total a Pagar</span><b>S/ ${Number(r.deuda_total).toFixed(2)}</b></div>
+          </div>
+          <table>
+            <thead><tr><th>Área</th><th>N° Papeleta</th><th>Tipo</th><th>Concepto</th><th>Monto</th></tr></thead>
+            <tbody>${filas}</tbody>
+          </table>
+        `;
+      } catch (err) {
+        resultDiv.className = 'result error';
+        resultDiv.textContent = `❌ Error de red: ${err.message}`;
+      }
+    });
+  </script>
+</body>
+</html>
