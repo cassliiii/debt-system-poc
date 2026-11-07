@@ -8,8 +8,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Portal web (Data Entry / Atención al Ciudadano)
-app.use(express.static(path.join(__dirname, '..', 'public')));
+// Portal web (Data Entry / Atención al Ciudadano) - código a cargo de Freddy (frontend)
+app.use(express.static(path.join(__dirname, '..', '..', 'frontend')));
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Debt System API funcionando 🚀' });
