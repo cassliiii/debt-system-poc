@@ -1,8 +1,32 @@
 const bigquery = require('../config/bigquery');
 const { validateCsvRows } = require('../middlewares/validator');
 
+// Columnas que la ingesta necesita. Las áreas pueden enviar columnas
+// adicionales propias (info que ellas manejan) en cualquier posición;
+// se leen por nombre de cabecera y todo lo demás se ignora.
+const REQUIRED_COLUMNS = ['dni', 'nombre', 'num_papeleta', 'tipo_monto', 'monto', 'concepto'];
+
+// Split de una línea CSV tolerante a comas dentro de valores entre comillas.
+const splitCsvLine = (line) => {
+  const values = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (const char of line) {
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      values.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  values.push(current.trim());
+  return values;
+};
+
 // 1. Ingesta de CSV (POST /upload)
-// CSV esperado: dni,nombre,num_papeleta,tipo_monto,monto,concepto
 const uploadCsvData = async (req, res) => {
   try {
     if (!req.file) {
@@ -21,16 +45,38 @@ const uploadCsvData = async (req, res) => {
       return res.status(400).json({ error: 'El archivo CSV está vacío o solo contiene la cabecera.' });
     }
 
-    // Parseo básico del CSV: dni,nombre,num_papeleta,tipo_monto,monto,concepto
+    // Ubicar, por nombre, las columnas requeridas dentro de la cabecera real
+    // del CSV (que puede traer columnas extra del área, en cualquier orden).
+    const headers = splitCsvLine(lines[0]).map(h => h.toLowerCase());
+    const columnIndex = {};
+    const columnasFaltantes = [];
+    for (const col of REQUIRED_COLUMNS) {
+      const idx = headers.indexOf(col);
+      if (idx === -1) {
+        columnasFaltantes.push(col);
+      } else {
+        columnIndex[col] = idx;
+      }
+    }
+    if (columnasFaltantes.length > 0) {
+      return res.status(400).json({
+        error: `El CSV no tiene las columnas requeridas: ${columnasFaltantes.join(', ')}.`,
+        columnasEncontradas: headers
+      });
+    }
+
+    // Parseo: solo se extraen las columnas requeridas; cualquier columna
+    // adicional del área (info que ellos manejan) se descarta aquí.
     const rows = lines.slice(1).map(line => {
-      const values = line.split(',').map(v => v.trim());
+      const values = splitCsvLine(line);
+      const tipoMonto = values[columnIndex.tipo_monto];
       return {
-        dni: values[0],
-        nombre: values[1],
-        num_papeleta: values[2],
-        tipo_monto: values[3] ? values[3].toUpperCase() : values[3],
-        monto: parseFloat(values[4]),
-        concepto: values[5]
+        dni: values[columnIndex.dni],
+        nombre: values[columnIndex.nombre],
+        num_papeleta: values[columnIndex.num_papeleta],
+        tipo_monto: tipoMonto ? tipoMonto.toUpperCase() : tipoMonto,
+        monto: parseFloat(values[columnIndex.monto]),
+        concepto: values[columnIndex.concepto]
       };
     });
 
