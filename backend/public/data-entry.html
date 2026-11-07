@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Data Entry - Sistema de Deudas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="card">
+    <h1>Data Entry</h1>
+    <p class="subtitle">Carga el CSV de deudas (BASE / INTERES) del área correspondiente.</p>
+
+    <form id="uploadForm">
+      <label for="area">Área</label>
+      <select id="area" name="area" required>
+        <option value="BD_Area1">BD_Area1 - Sede Central</option>
+        <option value="BD_Area2">BD_Area2 - Sede Norte</option>
+      </select>
+
+      <label for="file">Archivo CSV</label>
+      <input type="file" id="file" name="file" accept=".csv" required />
+
+      <div class="btn-row">
+        <button type="submit" class="btn">Subir e Ingresar</button>
+      </div>
+    </form>
+
+    <div id="result"></div>
+
+    <a class="back-link" href="index.html">&larr; Volver al inicio</a>
+  </div>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const resultDiv = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resultDiv.className = '';
+      resultDiv.textContent = 'Procesando...';
+      resultDiv.className = 'result';
+
+      const area = document.getElementById('area').value;
+      const fileInput = document.getElementById('file');
+      if (!fileInput.files.length) return;
+
+      const formData = new FormData();
+      formData.append('area', area);
+      formData.append('file', fileInput.files[0]);
+
+      try {
+        const res = await fetch('/api/debt/upload', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          resultDiv.className = 'result ok';
+          resultDiv.textContent = `✅ ${data.message}\nRegistros insertados: ${data.totalRegistros}`;
+        } else {
+          resultDiv.className = 'result error';
+          const errores = data.errors ? '\n- ' + data.errors.join('\n- ') : '';
+          resultDiv.textContent = `❌ ${data.message || data.error}${errores}`;
+        }
+      } catch (err) {
+        resultDiv.className = 'result error';
+        resultDiv.textContent = `❌ Error de red: ${err.message}`;
+      }
+    });
+  </script>
+</body>
+</html>

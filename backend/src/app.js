@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const debtRoutes = require('./routes/debtRoutes');
@@ -6,6 +7,9 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+
+// Portal web (Data Entry / Atención al Ciudadano)
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Debt System API funcionando 🚀' });
