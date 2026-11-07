@@ -1,3 +1,3 @@
-dni,nombre,num_papeleta,tipo_monto,monto,concepto
-123,Juan Perez,P1-099,BASE,150.50,Exceso de velocidad
-87654321,Maria Gomez,P1-100,RECARGO,monto_erroneo,Predial
+codigo_interno_area,dni,nombre,observaciones,num_papeleta,tipo_monto,monto,concepto
+INT-098,123,Juan Perez,sin observaciones,P1-099,BASE,150.50,Exceso de velocidad
+INT-099,87654321,Maria Gomez,sin observaciones,P1-100,RECARGO,monto_erroneo,Predial
