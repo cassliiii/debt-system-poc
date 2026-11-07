@@ -35,15 +35,24 @@
     const form = document.getElementById('uploadForm');
     const resultDiv = document.getElementById('result');
 
+    const submitBtn = form.querySelector('button[type="submit"]');
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      resultDiv.className = '';
-      resultDiv.textContent = 'Procesando...';
+      if (submitBtn.disabled) return; // evita doble envio / doble conteo
+
       resultDiv.className = 'result';
+      resultDiv.textContent = 'Procesando...';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Subiendo...';
 
       const area = document.getElementById('area').value;
       const fileInput = document.getElementById('file');
-      if (!fileInput.files.length) return;
+      if (!fileInput.files.length) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Subir e Ingresar';
+        return;
+      }
 
       const formData = new FormData();
       formData.append('area', area);
@@ -67,6 +76,9 @@
       } catch (err) {
         resultDiv.className = 'result error';
         resultDiv.textContent = `❌ Error de red: ${err.message}`;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Subir e Ingresar';
       }
     });
   </script>
