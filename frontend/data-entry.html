@@ -7,34 +7,43 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="card">
-    <h1>Data Entry</h1>
-    <p class="subtitle">Carga el CSV de deudas (BASE / INTERES) del área correspondiente.</p>
+  <header class="topbar">
+    <div class="logo">SD</div>
+    <div class="titles">
+      <div class="org">Oficina de Atención al Ciudadano</div>
+      <div class="system">Sistema Integrado de Reporte de Deudas</div>
+    </div>
+  </header>
 
-    <form id="uploadForm">
-      <label for="area">Área</label>
-      <select id="area" name="area" required>
-        <option value="BD_Area1">BD_Area1 - Sede Central</option>
-        <option value="BD_Area2">BD_Area2 - Sede Norte</option>
-      </select>
+  <main>
+    <div class="card">
+      <h1>Data Entry</h1>
+      <p class="subtitle">Carga el CSV de deudas (BASE / INTERES) del área correspondiente.</p>
 
-      <label for="file">Archivo CSV</label>
-      <input type="file" id="file" name="file" accept=".csv" required />
+      <form id="uploadForm">
+        <label for="area">Área</label>
+        <select id="area" name="area" required>
+          <option value="BD_Area1">BD_Area1 — Sede Central</option>
+          <option value="BD_Area2">BD_Area2 — Sede Norte</option>
+        </select>
 
-      <div class="btn-row">
-        <button type="submit" class="btn">Subir e Ingresar</button>
-      </div>
-    </form>
+        <label for="file">Archivo CSV</label>
+        <input type="file" id="file" name="file" accept=".csv" required />
 
-    <div id="result"></div>
+        <div class="btn-row">
+          <button type="submit" class="btn">Subir e Ingresar</button>
+        </div>
+      </form>
 
-    <a class="back-link" href="index.html">&larr; Volver al inicio</a>
-  </div>
+      <div id="result"></div>
+
+      <a class="back-link" href="index.html">&larr; Volver al inicio</a>
+    </div>
+  </main>
 
   <script>
     const form = document.getElementById('uploadForm');
     const resultDiv = document.getElementById('result');
-
     const submitBtn = form.querySelector('button[type="submit"]');
 
     form.addEventListener('submit', async (e) => {
