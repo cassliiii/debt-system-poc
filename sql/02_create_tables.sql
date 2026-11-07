@@ -3,7 +3,7 @@
 -- Usamos CREATE OR REPLACE porque cambia el esquema respecto a la versión anterior.
 
 -- 1. Tabla que emula la BD del Área 1 (Sede Central)
-CREATE OR REPLACE TABLE `project-7af4968a-3e72-490a-be0.ds_sistema_deudas.BD_Area1` (
+CREATE OR REPLACE TABLE `{{GCP_PROJECT_ID}}.ds_sistema_deudas.BD_Area1` (
   dni          STRING    OPTIONS(description="DNI del ciudadano de 8 dígitos"),
   nombre       STRING    OPTIONS(description="Nombre completo del ciudadano"),
   num_papeleta STRING    OPTIONS(description="Identificador único de la infracción/deuda (trazabilidad, evita doble conteo)"),
@@ -15,7 +15,7 @@ CREATE OR REPLACE TABLE `project-7af4968a-3e72-490a-be0.ds_sistema_deudas.BD_Are
 PARTITION BY DATE(fecha_carga);
 
 -- 2. Tabla que emula la BD del Área 2 (Sede Norte)
-CREATE OR REPLACE TABLE `project-7af4968a-3e72-490a-be0.ds_sistema_deudas.BD_Area2` (
+CREATE OR REPLACE TABLE `{{GCP_PROJECT_ID}}.ds_sistema_deudas.BD_Area2` (
   dni          STRING    OPTIONS(description="DNI del ciudadano de 8 dígitos"),
   nombre       STRING    OPTIONS(description="Nombre completo del ciudadano"),
   num_papeleta STRING    OPTIONS(description="Identificador único de la infracción/deuda (trazabilidad, evita doble conteo)"),

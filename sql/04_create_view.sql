@@ -3,7 +3,7 @@
 -- Expone deuda_base_total / interes_total por separado, y el detalle incluye
 -- el área de origen de cada fila para trazabilidad ante el ciudadano/operador.
 
-CREATE OR REPLACE VIEW `project-7af4968a-3e72-490a-be0.ds_sistema_deudas.VW_Reporte_Deuda` AS
+CREATE OR REPLACE VIEW `{{GCP_PROJECT_ID}}.ds_sistema_deudas.VW_Reporte_Deuda` AS
 SELECT
   dni,
   ANY_VALUE(nombre) AS nombre,
@@ -16,9 +16,9 @@ SELECT
   ) AS detalle
 FROM (
   SELECT 'BD_Area1' AS area, dni, nombre, num_papeleta, tipo_monto, monto, concepto, fecha_carga
-  FROM `project-7af4968a-3e72-490a-be0.ds_sistema_deudas.BD_Area1`
+  FROM `{{GCP_PROJECT_ID}}.ds_sistema_deudas.BD_Area1`
   UNION ALL
   SELECT 'BD_Area2' AS area, dni, nombre, num_papeleta, tipo_monto, monto, concepto, fecha_carga
-  FROM `project-7af4968a-3e72-490a-be0.ds_sistema_deudas.BD_Area2`
+  FROM `{{GCP_PROJECT_ID}}.ds_sistema_deudas.BD_Area2`
 )
 GROUP BY dni;

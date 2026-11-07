@@ -4,7 +4,7 @@
 -- consolidación cruzada). El resto tiene papeletas en una sola área.
 
 -- Área de Tránsito, Sede Central (BD_Area1)
-INSERT INTO `project-7af4968a-3e72-490a-be0.ds_sistema_deudas.BD_Area1`
+INSERT INTO `{{GCP_PROJECT_ID}}.ds_sistema_deudas.BD_Area1`
   (dni, nombre, num_papeleta, tipo_monto, monto, concepto, fecha_carga)
 VALUES
   ('10000001', 'Juan Perez Ramirez',     'P1-001', 'BASE',    150.50, 'Exceso de velocidad',        TIMESTAMP '2026-10-20 09:15:00'),
@@ -17,7 +17,7 @@ VALUES
   ('10000006', 'Patricia Vega Castro',   'P1-006', 'BASE',    180.00, 'Exceso de velocidad',        TIMESTAMP '2026-10-21 11:10:00');
 
 -- Área de Tránsito, Sede Norte (BD_Area2)
-INSERT INTO `project-7af4968a-3e72-490a-be0.ds_sistema_deudas.BD_Area2`
+INSERT INTO `{{GCP_PROJECT_ID}}.ds_sistema_deudas.BD_Area2`
   (dni, nombre, num_papeleta, tipo_monto, monto, concepto, fecha_carga)
 VALUES
   ('10000001', 'Juan Perez Ramirez',     'P2-001', 'BASE',    130.00, 'Estacionamiento indebido',   TIMESTAMP '2026-10-22 08:00:00'),

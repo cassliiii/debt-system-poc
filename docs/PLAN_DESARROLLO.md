@@ -142,10 +142,10 @@ bq query --use_legacy_sql=false < sql/03_insert_info.sql
 bq query --use_legacy_sql=false < sql/04_create_view.sql
 
 # 2. Dar permisos a la cuenta de servicio de Cloud Run (una sola vez)
-gcloud projects add-iam-policy-binding <tu-proyecto> \
+gcloud projects add-iam-policy-binding <GCP_PROJECT_ID> \
   --member="serviceAccount:<PROJECT_NUMBER>-compute@developer.gserviceaccount.com" \
   --role="roles/bigquery.dataEditor"
-gcloud projects add-iam-policy-binding <tu-proyecto> \
+gcloud projects add-iam-policy-binding <GCP_PROJECT_ID> \
   --member="serviceAccount:<PROJECT_NUMBER>-compute@developer.gserviceaccount.com" \
   --role="roles/bigquery.jobUser"
 
@@ -156,7 +156,7 @@ gcloud run deploy debt-system-poc \
   --allow-unauthenticated \
   --min-instances=0 --max-instances=2 \
   --memory=512Mi --cpu=1 \
-  --set-env-vars GCP_PROJECT_ID=<tu-proyecto>,BQ_DATASET=ds_sistema_deudas
+  --set-env-vars GCP_PROJECT_ID=<GCP_PROJECT_ID>,BQ_DATASET=ds_sistema_deudas
 ```
 
 Condiciones para quedarse en el free tier: región `us-central1`/`us-east1`/`us-west1`, `min-instances=0` (escala a cero), y los permisos IAM del paso 2 — no se necesita archivo de credenciales, Cloud Run usa la cuenta de servicio por defecto.
