@@ -1,4 +1,5 @@
 const bigquery = require('../config/bigquery');
+const { BQ_DATASET } = require('../config/env');
 const { validateCsvRows } = require('../middlewares/validator');
 
 // Columnas que la ingesta necesita. Las áreas pueden enviar columnas
@@ -89,7 +90,6 @@ const uploadCsvData = async (req, res) => {
       });
     }
 
-    const datasetId = process.env.BQ_DATASET || 'ds_sistema_deudas';
     const rowsToInsert = rows.map(r => ({
       dni: r.dni,
       nombre: r.nombre,
@@ -101,7 +101,7 @@ const uploadCsvData = async (req, res) => {
     }));
 
     // Inserción en BigQuery
-    await bigquery.dataset(datasetId).table(area).insert(rowsToInsert);
+    await bigquery.dataset(BQ_DATASET).table(area).insert(rowsToInsert);
 
     return res.status(200).json({
       success: true,
@@ -125,10 +125,9 @@ const getDebtByDni = async (req, res) => {
       return res.status(400).json({ error: 'DNI inválido. Debe tener exactamente 8 dígitos.' });
     }
 
-    const datasetId = process.env.BQ_DATASET || 'ds_sistema_deudas';
     const query = `
       SELECT dni, nombre, deuda_base_total, interes_total, deuda_total, detalle
-      FROM \`${datasetId}.VW_Reporte_Deuda\`
+      FROM \`${BQ_DATASET}.VW_Reporte_Deuda\`
       WHERE dni = @dni
     `;
 
