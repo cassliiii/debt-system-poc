@@ -168,3 +168,5 @@ ehthumbs.db
 *.njsproj
 *.sln
 *.swp
+
+pruebas-ingesta/java-quarkus/ingesta-demo/data/*.csv
