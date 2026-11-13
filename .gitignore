@@ -170,3 +170,10 @@ ehthumbs.db
 *.swp
 
 pruebas-ingesta/java-quarkus/ingesta-demo/data/*.csv
+
+# --- PYTHON ---
+.venv/
+__pycache__/
+*.pyc
+pruebas-ingesta/python/ingesta_demo/data/*.csv
+pruebas-ingesta/python/out/
