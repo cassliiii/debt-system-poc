@@ -1,0 +1,18 @@
+# Dependencias y salida de compilación
+**/node_modules/
+**/dist/
+**/*.tsbuildinfo
+
+# Variables de entorno y credenciales
+**/.env
+**/.env.*
+!.env.example
+
+# CSV masivos de prueba
+*.csv
+
+# Logs y resultados locales
+*.log
+out/
+resultados/
+coverage/
