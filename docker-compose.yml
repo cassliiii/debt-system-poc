@@ -1,9 +1,6 @@
-services:
+version: '3.8'
 
-  
-  # ----------------------------
-  # BD_Area1 -> Oracle AI Database 26ai Free
-  # ----------------------------
+services:
   oracle-area1:
     image: container-registry.oracle.com/database/free:latest-lite
     container_name: oracle-area1
@@ -11,14 +8,24 @@ services:
     ports:
       - "1521:1521"
     environment:
-      ORACLE_PWD: DbArea12024!
-      ORACLE_CHARACTERSET: AL32UTF8
+      ORACLE_PWD: ${ORACLE_PASSWORD}
+      ORACLE_CHARACTERSET: ${ORACLE_CHARACTERSET}
     volumes:
       - oracle1_data:/opt/oracle/oradata
+    networks:
+      - debt-network
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          printf 'whenever sqlerror exit 1\nselect 1 from dual;\nexit;\n' |
+          sqlplus -L -s system/$${ORACLE_PWD}@//localhost:1521/FREEPDB1 |
+          grep -qE '(^|[[:space:]])1([[:space:]]|$)'
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 120s
 
-  # ----------------------------
-  # BD_Area2 -> PostgreSQL 16
-  # ----------------------------
   postgresql-area2:
     image: postgres:16
     container_name: postgresql-area2
@@ -26,12 +33,91 @@ services:
     ports:
       - "5429:5432"
     environment:
-      POSTGRES_USER: area2_user
-      POSTGRES_PASSWORD: PgArea2Secure!2024
-      POSTGRES_DB: db_area2
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres2_data:/var/lib/postgresql/data
+    networks:
+      - debt-network
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}" -h 127.0.0.1
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  ingesta-java:
+    build:
+      context: ./pruebas-ingesta/java-quarkus/ingesta-demo
+      dockerfile: src/main/docker/Dockerfile.jvm
+    container_name: ingesta-java
+    restart: "no"
+    depends_on:
+      oracle-area1:
+        condition: service_healthy
+      postgresql-area2:
+        condition: service_healthy
+    environment:
+      ORA_URL: jdbc:oracle:thin:@//oracle-area1:1521/FREEPDB1
+      ORA_USER: ${ORACLE_APP_USER}
+      ORA_PASSWORD: ${ORACLE_APP_PASSWORD}
+      PG_URL: jdbc:postgresql://postgresql-area2:5432/${POSTGRES_DB}?currentSchema=area2
+      PG_USER: ${POSTGRES_USER}
+      PG_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - debt-network
+
+  consulta-service:
+    build:
+      context: ./backend/consulta-service
+      dockerfile: src/main/docker/Dockerfile.jvm
+    container_name: consulta-service
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      oracle-area1:
+        condition: service_healthy
+      postgresql-area2:
+        condition: service_healthy
+    environment:
+      QUARKUS_HTTP_HOST: 0.0.0.0
+      QUARKUS_HTTP_PORT: 8080
+      ORA_URL: jdbc:oracle:thin:@//oracle-area1:1521/FREEPDB1
+      ORA_USER: ${ORACLE_APP_USER}
+      ORA_PASSWORD: ${ORACLE_APP_PASSWORD}
+      PG_URL: jdbc:postgresql://postgresql-area2:5432/${POSTGRES_DB}?currentSchema=area2
+      PG_USER: ${POSTGRES_USER}
+      PG_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - debt-network
+
+  front:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: debt-front
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      consulta-service:
+        condition: service_started
+    environment:
+      API_BASE_URL: ${FRONTEND_API_BASE_URL}
+    networks:
+      - debt-network
+
+networks:
+  debt-network:
+    name: debt-network
+    driver: bridge
 
 volumes:
   oracle1_data:
+    name: oracle1_data
   postgres2_data:
+    name: postgres2_data
