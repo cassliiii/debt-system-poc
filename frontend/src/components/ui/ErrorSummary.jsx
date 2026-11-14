@@ -5,18 +5,20 @@ import './ErrorSummary.css'
 /**
  * Resumen de errores de un formulario.
  * @param {object} props
- * @param {Array<{ fieldId: string, label?: string, message?: string }>} props.errors
+ * @param {Array<{ fieldId?: string, label?: string, message?: string }>} [props.errors]
+ * @param {string} [props.title]
  */
-export function ErrorSummary({ errors }) {
+export function ErrorSummary({ errors = [], title }) {
   const titleId = useId()
   const summaryRef = useRef(null)
   const count = errors.length
+  const hasContent = count > 0 || Boolean(title)
 
   useEffect(() => {
-    if (count > 0) summaryRef.current?.focus()
-  }, [count])
+    summaryRef.current?.focus()
+  }, [])
 
-  if (count === 0) return null
+  if (!hasContent) return null
 
   const handleFieldClick = (event, fieldId) => {
     event.preventDefault()
@@ -43,20 +45,32 @@ export function ErrorSummary({ errors }) {
       />
       <div className="error-summary__content">
         <p id={titleId} className="error-summary__title">
-          Hay {count} problemas
+          {title ?? `Hay ${count} problemas`}
         </p>
-        <ul className="error-summary__list">
-          {errors.map((error) => (
-            <li key={error.fieldId}>
-              <a
-                href={`#${error.fieldId}`}
-                onClick={(event) => handleFieldClick(event, error.fieldId)}
-              >
-                {error.label ?? error.message ?? error.fieldId}
-              </a>
-            </li>
-          ))}
-        </ul>
+        {count > 0 ? (
+          <ul className="error-summary__list">
+            {errors.map((error, index) => {
+              const label = error.label ?? error.message ?? error.fieldId
+
+              return (
+                <li key={error.fieldId ?? `error-${index}`}>
+                  {error.fieldId ? (
+                    <a
+                      href={`#${error.fieldId}`}
+                      onClick={(event) =>
+                        handleFieldClick(event, error.fieldId)
+                      }
+                    >
+                      {label}
+                    </a>
+                  ) : (
+                    <span>{label}</span>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+        ) : null}
       </div>
     </div>
   )
