@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   oracle-area1:
     image: container-registry.oracle.com/database/free:latest-lite
@@ -49,24 +47,31 @@ services:
       retries: 20
       start_period: 10s
 
+  # ----------------------------
+  # Aplicacion ingesta (Quarkus)
+  # ----------------------------
   ingesta-java:
-    build:
-      context: ./pruebas-ingesta/java-quarkus/ingesta-demo
-      dockerfile: src/main/docker/Dockerfile.jvm
+    image: luisenrique2025/ingesta-demo:1.0
     container_name: ingesta-java
-    restart: "no"
+    restart: unless-stopped
     depends_on:
       oracle-area1:
         condition: service_healthy
       postgresql-area2:
         condition: service_healthy
+    ports:
+      - "8081:8080"
     environment:
-      ORA_URL: jdbc:oracle:thin:@//oracle-area1:1521/FREEPDB1
-      ORA_USER: ${ORACLE_APP_USER}
-      ORA_PASSWORD: ${ORACLE_APP_PASSWORD}
-      PG_URL: jdbc:postgresql://postgresql-area2:5432/${POSTGRES_DB}?currentSchema=area2
-      PG_USER: ${POSTGRES_USER}
-      PG_PASSWORD: ${POSTGRES_PASSWORD}
+      ORA_URL: "jdbc:oracle:thin:@//oracle-area1:1521/FREEPDB1"
+      ORA_USER: "AREA1"
+      ORA_PASS: "Area1Poc2024"
+      PG_URL: "jdbc:postgresql://postgresql-area2:5432/db_area2"
+      PG_USER: "area2_user"
+      PG_PASS: "PgArea2Secure!2024"
+      INGESTA_DIR: "/ingestas"
+      JAVA_OPTS_APPEND: "-Xms2g -Xmx2g"
+    volumes:
+      - ./ingestas:/ingestas
     networks:
       - debt-network
 
@@ -115,33 +120,6 @@ networks:
   debt-network:
     name: debt-network
     driver: bridge
-
-  # ----------------------------
-  # Aplicacion ingesta (Quarkus)
-  # ----------------------------
-    # ----------------------------
-  # Aplicacion ingesta (Quarkus)
-  # ----------------------------
-  ingesta-demo:
-    image: luisenrique2025/ingesta-demo:1.0
-    container_name: ingesta-demo
-    restart: unless-stopped
-    depends_on:
-      - oracle-area1
-      - postgresql-area2
-    ports:
-      - "8080:8080"
-    environment:
-      ORA_URL: "jdbc:oracle:thin:@//oracle-area1:1521/FREEPDB1"
-      ORA_USER: "AREA1"
-      ORA_PASS: "Area1Poc2024"
-      PG_URL: "jdbc:postgresql://postgresql-area2:5432/db_area2"
-      PG_USER: "area2_user"
-      PG_PASS: "PgArea2Secure!2024"
-      INGESTA_DIR: "/ingestas"
-      JAVA_OPTS_APPEND: "-Xms2g -Xmx2g"
-    volumes:
-      - ./ingestas:/ingestas
 
 volumes:
   oracle1_data:
