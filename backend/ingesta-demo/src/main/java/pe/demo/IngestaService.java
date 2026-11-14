@@ -57,6 +57,11 @@ import static pe.demo.ColumnType.INT;
 import static pe.demo.ColumnType.LOAD_TS;
 import static pe.demo.ColumnType.TEXT;
 
+import java.math.RoundingMode;
+import java.time.format.DateTimeParseException;
+import java.util.HashSet;
+import java.util.Set;
+
 @ApplicationScoped
 public class IngestaService {
 
@@ -205,7 +210,7 @@ final class AreaSpecs {
   private static ColumnSpec o(String n, ColumnType t) { return new ColumnSpec(n, t, false); }
 
   private static final AreaSpec AREA1 = new AreaSpec("AREA1", "oracle", "area1.deudas", "area1", List.of(
-          o("codigo_interno_area", TEXT),
+          r("codigo_interno_area", TEXT),
           r("nro_documento", TEXT),
           r("nombre", TEXT),
           r("num_papeleta", TEXT),
@@ -337,62 +342,295 @@ final class CsvRowReader implements Iterator<String[]>, AutoCloseable {
 }
 
 /**
- * Validacion local: obligatorias, formato de numeros/fechas y regla DNI (8 digitos).
- * Longitudes y precision NUMBER(15,2) se dejan a la BD a proposito (rechazo origen=BD).
+ * Validacion local por columna: obligatorias, normalizacion, longitud (bytes en Oracle, caracteres en
+ * PostgreSQL), dominios, formatos, rangos y reglas entre campos.
+ * Los formatos de codigos (DIST-, FISC-, EQ-, OPER-, etc.) salen de las filas de muestra:
+ * confirmarlos con cada area antes de usarlos como regla de rechazo en produccion.
  */
 final class RowValidator {
 
   public record Result(Object[] values, String error) { }
 
+  private record Rule(int maxLen, Pattern pattern, Set<String> domain, boolean upper) { }
+
+  // ---- Patrones (declarados ANTES de los mapas que los usan) ----
   private static final Pattern DNI = Pattern.compile("\\d{8}");
+  private static final Pattern RUC = Pattern.compile("\\d{11}");
+  private static final Pattern CE = Pattern.compile("[A-Z0-9]{9,12}");
+  private static final Pattern HORA = Pattern.compile("([01]\\d|2[0-3]):[0-5]\\d(:[0-5]\\d)?");
+  private static final Pattern PUNTOS = Pattern.compile("\\d{1,3}");
+  private static final Pattern MONTO = Pattern.compile("\\d{1,13}(\\.\\d{1,2})?");
+  private static final Pattern PORCENTAJE = Pattern.compile("\\d{1,3}(\\.\\d{1,2})?");
+  private static final Pattern NOMBRE = Pattern.compile("[\\p{L}\\p{N} .,'&-]+");
+  private static final Pattern CODIGO = Pattern.compile("[A-Z0-9-]+");
+  private static final Pattern PLACA = Pattern.compile("[A-Z0-9]{3}-?[A-Z0-9]{3}");
+  private static final Pattern COD_INFRACCION = Pattern.compile("[A-Z0-9]+-\\d{3}");
+  private static final Pattern DISTRITO = Pattern.compile("DIST-\\d{3}");
+  private static final Pattern FISCALIZADOR = Pattern.compile("FISC-\\d{4}");
+  private static final Pattern LICENCIA = Pattern.compile("[A-Z]\\d{8}");
+  private static final Pattern TIPO_EQUIPO = Pattern.compile("[A-Z_]+");
+  private static final Pattern COD_EQUIPO = Pattern.compile("EQ-[A-Z]+-\\d{4}");
+  private static final Pattern COD_OPERADOR = Pattern.compile("OPER-[A-Z]+-\\d{3}");
+
+  private static final boolean VALIDAR_COHERENCIA_DESCUENTO = true;   // poner false si el area calcula el descuento de otra forma
+  private static final LocalDate FECHA_MINIMA = LocalDate.of(2000, 1, 1);
+  private static final BigDecimal CIEN = BigDecimal.valueOf(100);
+  private static final BigDecimal TOLERANCIA = new BigDecimal("0.01");
+
+  private static Rule libre(int max) { return new Rule(max, null, null, false); }
+  private static Rule codigo(int max, Pattern p) { return new Rule(max, p, null, true); }
+  private static Rule dominio(int max, String... v) { return new Rule(max, null, Set.of(v), true); }
+
+  // ---- Reglas por columna: longitudes = las de las tablas ----
+  private static final Map<String, Rule> COMUN = Map.ofEntries(
+          Map.entry("nro_documento", codigo(20, null)),                 // el formato depende de tipo_documento
+          Map.entry("nombre", new Rule(150, NOMBRE, null, false)),
+          Map.entry("tipo_documento", dominio(20, "DNI", "CE", "RUC")),
+          Map.entry("num_papeleta", codigo(50, CODIGO)),
+          Map.entry("placa_vehiculo", codigo(20, PLACA)),
+          Map.entry("codigo_infraccion", codigo(20, COD_INFRACCION)),
+          Map.entry("calificacion_infraccion", dominio(30, "LEVE", "GRAVE", "MUY_GRAVE")),
+          Map.entry("codigo_distrito", codigo(20, DISTRITO)),
+          Map.entry("direccion_infraccion", libre(200)),
+          Map.entry("medio_notificacion", dominio(20, "FISICA", "ELECTRONICA")),
+          Map.entry("estado_deuda", dominio(30, "PENDIENTE", "PAGADA")),
+          Map.entry("numero_resolucion", codigo(50, CODIGO)));
+
+  private static final Map<String, Rule> EXTRA_AREA1 = Map.ofEntries(
+          Map.entry("modalidad_deteccion", dominio(30, "PRESENCIAL")),
+          Map.entry("codigo_interno_area", codigo(50, CODIGO)),
+          Map.entry("marca_vehiculo", libre(50)),
+          Map.entry("modelo_vehiculo", libre(20)),
+          Map.entry("codigo_fiscalizador", codigo(20, FISCALIZADOR)),
+          Map.entry("dni_conductor", codigo(20, DNI)),
+          Map.entry("numero_licencia", codigo(30, LICENCIA)));
+
+  private static final Map<String, Rule> EXTRA_AREA2 = Map.ofEntries(
+          Map.entry("modalidad_deteccion", dominio(30, "ELECTRONICA")),
+          Map.entry("sede", libre(100)),
+          Map.entry("tipo_equipo", codigo(30, TIPO_EQUIPO)),            // pasar a dominio() cuando se tenga el catalogo
+          Map.entry("codigo_equipo", codigo(30, COD_EQUIPO)),
+          Map.entry("codigo_certificacion", codigo(50, CODIGO)),
+          Map.entry("codigo_operador", codigo(30, COD_OPERADOR)));
 
   private final List<ColumnSpec> cols;
-  private final int idxDoc;
-  private final int idxTipo;
+  private final Rule[] rules;
+  private final boolean bytes;                       // Oracle VARCHAR2 mide bytes; PostgreSQL mide caracteres
+  private final LocalDate hoy = LocalDate.now();
+  private final int idxDoc, idxTipo, idxPap, idxCodInt, idxHora, idxInfr, idxEmi, idxNot, idxVen,
+          idxCert, idxCodCert, idxBase, idxPct, idxDesc;
+
+  // Solo los usa el hilo lector (un job = un validador), por eso no necesitan sincronizacion
+  private final Set<String> papeletas = new HashSet<>(1 << 20);
+  private final Set<String> codigosInternos = new HashSet<>();
 
   public RowValidator(AreaSpec spec) {
     this.cols = spec.columns();
-    int d = -1, t = -1;
-    for (int i = 0; i < cols.size(); i++) {
-      if (cols.get(i).name().equals("nro_documento")) d = i;
-      if (cols.get(i).name().equals("tipo_documento")) t = i;
-    }
-    this.idxDoc = d;
-    this.idxTipo = t;
+    this.bytes = spec.motor().equals("oracle");
+    Map<String, Rule> map = new HashMap<>(COMUN);
+    map.putAll(spec.name().equals("AREA1") ? EXTRA_AREA1 : EXTRA_AREA2);
+    this.rules = new Rule[cols.size()];
+    for (int i = 0; i < cols.size(); i++) rules[i] = map.get(cols.get(i).name());
+
+    idxDoc = indice("nro_documento");
+    idxTipo = indice("tipo_documento");
+    idxPap = indice("num_papeleta");
+    idxCodInt = indice("codigo_interno_area");
+    idxHora = indice("hora_infraccion");
+    idxInfr = indice("fecha_infraccion");
+    idxEmi = indice("fecha_emision");
+    idxNot = indice("fecha_notificacion");
+    idxVen = indice("fecha_vencimiento");
+    idxCert = indice("fecha_certificacion");
+    idxCodCert = indice("codigo_certificacion");
+    idxBase = indice("monto_base");
+    idxPct = indice("porcentaje_descuento");
+    idxDesc = indice("monto_descuento");
+  }
+
+  private int indice(String nombre) {
+    for (int i = 0; i < cols.size(); i++) if (cols.get(i).name().equals(nombre)) return i;
+    return -1;
   }
 
   public Result validate(String[] raw) {
-    Object[] out = new Object[cols.size()];
+    int n = cols.size();
+    Object[] out = new Object[n];
+    LocalDate[] ld = new LocalDate[n];
     StringBuilder err = null;
 
-    for (int i = 0; i < cols.size(); i++) {
+    // ---- 1. Reglas por columna ----
+    for (int i = 0; i < n; i++) {
       ColumnSpec c = cols.get(i);
-      String v = raw[i];
-      if (v != null && v.isEmpty()) v = null;
-
+      if (c.type() == ColumnType.LOAD_TS) continue;
+      String v = limpiar(raw[i]);
       if (v == null) {
         if (c.required()) err = add(err, c.name() + ": obligatorio");
         continue;
       }
-      try {
-        out[i] = switch (c.type()) {
-          case TEXT -> v;
-          case INT -> Integer.valueOf(v);
-          case DECIMAL -> new BigDecimal(v);
-          case DATE -> java.sql.Date.valueOf(LocalDate.parse(v));
-          case LOAD_TS -> null;
-        };
-      } catch (RuntimeException e) {
-        err = add(err, c.name() + ": formato invalido (" + v + ")");
+      String e = switch (c.type()) {
+        case TEXT -> i == idxHora ? hora(v, out, i) : texto(c.name(), rules[i], v, out, i);
+        case INT -> entero(c.name(), v, out, i);
+        case DECIMAL -> decimal(c.name(), v, out, i);
+        case DATE -> fecha(c.name(), v, out, ld, i);
+        case LOAD_TS -> null;
+      };
+      if (e != null) err = add(err, e);
+    }
+
+    // ---- 2. Reglas entre campos ----
+    err = orden(err, ld, idxInfr, idxEmi, "fecha_infraccion", "fecha_emision");
+    err = orden(err, ld, idxEmi, idxNot, "fecha_emision", "fecha_notificacion");
+    err = orden(err, ld, idxNot, idxVen, "fecha_notificacion", "fecha_vencimiento");
+
+    if (idxDoc >= 0 && idxTipo >= 0 && out[idxDoc] != null && out[idxTipo] != null) {
+      String tipo = (String) out[idxTipo];
+      Pattern p = tipo.equals("DNI") ? DNI : tipo.equals("RUC") ? RUC : CE;
+      if (!p.matcher((String) out[idxDoc]).matches()) {
+        err = add(err, "nro_documento: no corresponde al tipo " + tipo + " (" + out[idxDoc] + ")");
       }
     }
 
-    if (idxDoc >= 0 && idxTipo >= 0
-            && "DNI".equalsIgnoreCase(String.valueOf(out[idxTipo]))
-            && out[idxDoc] != null && !DNI.matcher((String) out[idxDoc]).matches()) {
-      err = add(err, "nro_documento: DNI debe tener 8 digitos (" + out[idxDoc] + ")");
+    BigDecimal base = (BigDecimal) out[idxBase], pct = (BigDecimal) out[idxPct], desc = (BigDecimal) out[idxDesc];
+    if (base != null && pct != null && desc != null) {
+      if (desc.compareTo(base) > 0) {
+        err = add(err, "monto_descuento: no puede superar monto_base");
+      } else if (VALIDAR_COHERENCIA_DESCUENTO) {
+        BigDecimal esperado = base.multiply(pct).divide(CIEN, 2, RoundingMode.HALF_UP);
+        if (desc.subtract(esperado).abs().compareTo(TOLERANCIA) > 0) {
+          err = add(err, "monto_descuento: no coincide con monto_base x porcentaje_descuento (esperado "
+                  + esperado.toPlainString() + ", recibido " + desc.toPlainString() + ")");
+        }
+      }
+    }
+
+    if (idxCert >= 0 && idxCodCert >= 0) {                      // solo Area 2
+      boolean sinFecha = raw[idxCert] == null || raw[idxCert].isBlank();
+      if (out[idxCodCert] != null && sinFecha) {
+        err = add(err, "fecha_certificacion: obligatoria cuando hay codigo_certificacion");
+      }
+      if (ld[idxCert] != null && idxInfr >= 0 && ld[idxInfr] != null && ld[idxCert].isAfter(ld[idxInfr])) {
+        err = add(err, "fecha_certificacion: no puede ser posterior a fecha_infraccion");
+      }
+    }
+
+    // ---- 3. Unicidad dentro del archivo (solo si el resto de la fila es valido) ----
+    if (err == null) {
+      String pap = (String) out[idxPap];
+      String cod = idxCodInt >= 0 ? (String) out[idxCodInt] : null;
+      if (papeletas.contains(pap)) err = add(err, "num_papeleta: duplicada en el archivo (" + pap + ")");
+      if (cod != null && codigosInternos.contains(cod)) {
+        err = add(err, "codigo_interno_area: duplicado en el archivo (" + cod + ")");
+      }
+      if (err == null) {
+        papeletas.add(pap);
+        if (cod != null) codigosInternos.add(cod);
+      }
     }
     return new Result(out, err == null ? null : err.toString());
+  }
+
+  // ---- Validadores por tipo: devuelven el mensaje de error o null, y dejan el valor tipado en out[i] ----
+
+  private String texto(String name, Rule r, String v, Object[] out, int i) {
+    if (r != null) {
+      if (r.upper()) v = v.toUpperCase(Locale.ROOT);
+      if (tieneControl(v)) return name + ": contiene caracteres de control";
+      if (longitud(v) > r.maxLen()) {
+        return name + ": excede " + r.maxLen() + (bytes ? " bytes" : " caracteres");
+      }
+      if (r.domain() != null && !r.domain().contains(v)) return name + ": valor no permitido (" + v + ")";
+      if (r.pattern() != null && !r.pattern().matcher(v).matches()) return name + ": formato invalido (" + v + ")";
+    }
+    out[i] = v;
+    return null;
+  }
+
+  private String hora(String v, Object[] out, int i) {
+    if (!HORA.matcher(v).matches()) return "hora_infraccion: hora invalida, use HH:mm o HH:mm:ss (" + v + ")";
+    out[i] = v.length() == 5 ? v + ":00" : v;                   // normaliza a HH:mm:ss
+    return null;
+  }
+
+  private String entero(String name, String v, Object[] out, int i) {
+    if (!PUNTOS.matcher(v).matches()) return name + ": debe ser un entero entre 0 y 999 (" + v + ")";
+    out[i] = Integer.valueOf(v);
+    return null;
+  }
+
+  private String decimal(String name, String v, Object[] out, int i) {
+    boolean esPct = name.equals("porcentaje_descuento");
+    if (!(esPct ? PORCENTAJE : MONTO).matcher(v).matches()) {
+      return name + ": formato numerico invalido, maximo 2 decimales y sin separador de miles (" + v + ")";
+    }
+    BigDecimal bd = new BigDecimal(v);
+    if (esPct && bd.compareTo(CIEN) > 0) return name + ": debe estar entre 0 y 100 (" + v + ")";
+    if (name.equals("monto_base") && bd.signum() <= 0) return name + ": debe ser mayor que 0 (" + v + ")";
+    out[i] = bd;
+    return null;
+  }
+
+  private String fecha(String name, String v, Object[] out, LocalDate[] ld, int i) {
+    LocalDate d;
+    try {
+      d = LocalDate.parse(v);                                   // ISO estricto: yyyy-MM-dd
+    } catch (DateTimeParseException e) {
+      return name + ": fecha invalida, use yyyy-MM-dd (" + v + ")";
+    }
+    switch (name) {
+      case "fecha_infraccion" -> {
+        if (d.isBefore(FECHA_MINIMA) || d.isAfter(hoy)) return name + ": fuera de rango (" + v + ")";
+      }
+      case "fecha_emision" -> {
+        if (d.isAfter(hoy)) return name + ": no puede ser futura (" + v + ")";
+      }
+      default -> { }
+    }
+    ld[i] = d;
+    out[i] = java.sql.Date.valueOf(d);
+    return null;
+  }
+
+  private static StringBuilder orden(StringBuilder err, LocalDate[] ld, int a, int b, String na, String nb) {
+    if (a >= 0 && b >= 0 && ld[a] != null && ld[b] != null && ld[a].isAfter(ld[b])) {
+      return add(err, na + " no puede ser posterior a " + nb);
+    }
+    return err;
+  }
+
+  // ---- Utilitarios ----
+
+  /** trim + colapsa espacios repetidos; vacio = null. */
+  private static String limpiar(String s) {
+    if (s == null) return null;
+    s = s.strip();
+    if (s.isEmpty()) return null;
+    for (int k = 1; k < s.length(); k++) {
+      if (s.charAt(k) == ' ' && s.charAt(k - 1) == ' ') return s.replaceAll(" {2,}", " ");
+    }
+    return s;
+  }
+
+  private static boolean tieneControl(String s) {
+    for (int k = 0; k < s.length(); k++) {
+      char ch = s.charAt(k);
+      if (ch < 0x20 || ch == 0x7F) return true;
+    }
+    return false;
+  }
+
+  /** Oracle (AL32UTF8): bytes UTF-8. PostgreSQL: caracteres. */
+  private int longitud(String v) {
+    if (!bytes) return v.codePointCount(0, v.length());
+    int n = 0;
+    for (int k = 0; k < v.length(); k++) {
+      char ch = v.charAt(k);
+      if (ch < 0x80) n += 1;
+      else if (ch < 0x800) n += 2;
+      else if (Character.isHighSurrogate(ch)) { n += 4; k++; }
+      else n += 3;
+    }
+    return n;
   }
 
   private static StringBuilder add(StringBuilder sb, String msg) {

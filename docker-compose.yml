@@ -51,7 +51,7 @@ services:
   # Aplicacion ingesta (Quarkus)
   # ----------------------------
   ingesta-java:
-    image: luisenrique2025/ingesta-demo:1.0
+    image: luisenrique2025/ingesta-demo:1.2
     container_name: ingesta-java
     restart: unless-stopped
     depends_on:
@@ -75,6 +75,9 @@ services:
     networks:
       - debt-network
 
+  # ----------------------------
+  # Aplicacion consulta (Java)
+  # ----------------------------
   consulta-service:
     build:
       context: ./backend/consulta-service

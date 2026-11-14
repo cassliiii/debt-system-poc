@@ -64,3 +64,7 @@ CREATE TABLE area1.deudas (
 
 -- 4. Índice para búsquedas por número de documento
 CREATE INDEX idx_deudas_nrodoc ON area1.deudas (nro_documento);
+
+ALTER USER AREA1 ACCOUNT UNLOCK;
+ALTER USER AREA1 IDENTIFIED BY Area1Poc2024;
+ALTER PROFILE DEFAULT LIMIT FAILED_LOGIN_ATTEMPTS UNLIMITED;
