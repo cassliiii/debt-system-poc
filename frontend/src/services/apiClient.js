@@ -2,7 +2,7 @@ import { API_URL } from '../config/app.js'
 import { ApiError } from './errors.js'
 
 const GENERIC_MESSAGE = 'No se pudo procesar la solicitud.'
-const CONNECTION_MESSAGE =
+export const CONNECTION_MESSAGE =
   'No se pudo conectar con el servidor. Verifique su conexión e intente nuevamente.'
 
 /**
@@ -24,15 +24,16 @@ async function parseBody(response) {
 /**
  * Realiza una solicitud HTTP a la API.
  * @param {string} path
- * @param {RequestInit} [options]
+ * @param {RequestInit & { baseUrl?: string }} [options]
  * @returns {Promise<any>}
  */
 export async function request(path, options = {}) {
-  const baseUrl = API_URL.replace(/\/$/, '')
+  const { baseUrl = API_URL, ...requestOptions } = options
+  const normalizedBaseUrl = baseUrl.replace(/\/$/, '')
   let response
 
   try {
-    response = await fetch(`${baseUrl}${path}`, options)
+    response = await fetch(`${normalizedBaseUrl}${path}`, requestOptions)
   } catch {
     throw new ApiError(0, CONNECTION_MESSAGE)
   }

@@ -7,6 +7,7 @@ import { ErrorSummary } from '../components/ui/ErrorSummary.jsx'
 import { FileDropzone } from '../components/ui/FileDropzone.jsx'
 import { Modal } from '../components/ui/Modal.jsx'
 import { Panel } from '../components/ui/Panel.jsx'
+import { ProgressBar } from '../components/ui/ProgressBar.jsx'
 import { SelectField } from '../components/ui/SelectField.jsx'
 import { TextField } from '../components/ui/TextField.jsx'
 import './UiPreview.css'
@@ -164,6 +165,21 @@ export function UiPreview() {
           <Alert variant="error" title="No se pudo completar la consulta">
             Revise el DNI e intente nuevamente.
           </Alert>
+        </div>
+      </Panel>
+
+      <Panel title="Progreso">
+        <div className="ui-preview__stack">
+          <ProgressBar
+            value={42}
+            label="Procesando 420 000 de 1 000 000 registros"
+            ariaLabel="Progreso de la carga"
+          />
+          <ProgressBar
+            value={null}
+            label="La carga está en cola."
+            ariaLabel="Progreso de la carga"
+          />
         </div>
       </Panel>
 

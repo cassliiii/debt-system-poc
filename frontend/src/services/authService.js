@@ -11,7 +11,7 @@ function getStorage() {
 /**
  * Inicia sesión y guarda la sesión en sessionStorage.
  * @param {{ usuario: string, password: string }} credentials
- * @returns {Promise<{ usuario: string, nombre: string, rol: string, expiraEn: number }>}
+ * @returns {Promise<{ usuario: string, nombre: string, rol: string, area: string | null, expiraEn: number }>}
  */
 export async function login({ usuario, password }) {
   const user = await loginMock({ usuario, password })
@@ -20,6 +20,7 @@ export async function login({ usuario, password }) {
     usuario: user.usuario,
     nombre: user.nombre,
     rol: user.rol,
+    area: user.area ?? null,
     expiraEn: Date.now() + SESSION_MINUTES * 60 * 1000,
   }
 
@@ -40,7 +41,7 @@ export function logout() {
 
 /**
  * Devuelve la sesión vigente o null si no existe o expiró.
- * @returns {{ usuario: string, nombre: string, rol: string, expiraEn: number } | null}
+ * @returns {{ usuario: string, nombre: string, rol: string, area: string | null, expiraEn: number } | null}
  */
 export function getSession() {
   const storage = getStorage()
@@ -59,7 +60,7 @@ export function getSession() {
       storage.removeItem(SESSION_KEY)
       return null
     }
-    return session
+    return { ...session, area: session.area ?? null }
   } catch {
     storage.removeItem(SESSION_KEY)
     return null

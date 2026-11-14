@@ -1,4 +1,5 @@
 import { MAX_UPLOAD_MB } from '../config/app.js'
+import { findMissingColumns, readCsvHeader } from './csvHeader.js'
 
 /**
  * Valida que el DNI tenga exactamente 8 dígitos.
@@ -42,4 +43,40 @@ export function validateCsvFile(file) {
   }
 
   return errors
+}
+
+/**
+ * Valida el archivo y su cabecera contra el contrato del área.
+ * @param {File | null | undefined} file
+ * @param {string} areaCode
+ * @returns {Promise<string[]>}
+ */
+export async function validateCsvForArea(file, areaCode) {
+  const fileErrors = validateCsvFile(file)
+  if (fileErrors.length > 0) {
+    return fileErrors
+  }
+
+  try {
+    const header = await readCsvHeader(file)
+    const missingColumns = findMissingColumns(header, areaCode)
+
+    if (missingColumns.length === 0) {
+      return []
+    }
+
+    const shownColumns = missingColumns.slice(0, 8).join(', ')
+    const remaining = missingColumns.length - 8
+    const remainingText = remaining > 0 ? ` y ${remaining} más` : ''
+
+    return [
+      `Faltan columnas obligatorias: ${shownColumns}${remainingText}.`,
+    ]
+  } catch (error) {
+    return [
+      error instanceof Error
+        ? error.message
+        : 'No se pudo leer la cabecera del archivo.',
+    ]
+  }
 }

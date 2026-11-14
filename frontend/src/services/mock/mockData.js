@@ -4,12 +4,21 @@ export const USERS = [
     password: 'demo1234',
     nombre: 'Carlos Ramos',
     rol: 'atencion',
+    area: null,
   },
   {
-    usuario: 'operador',
+    usuario: 'operador1',
     password: 'demo1234',
     nombre: 'María Pérez',
     rol: 'operador',
+    area: 'AREA1',
+  },
+  {
+    usuario: 'operador2',
+    password: 'demo1234',
+    nombre: 'Luis Quispe',
+    rol: 'operador',
+    area: 'AREA2',
   },
 ]
 
