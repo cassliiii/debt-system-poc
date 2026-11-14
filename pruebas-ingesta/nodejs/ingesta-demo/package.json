@@ -1,0 +1,25 @@
+{
+  "name": "ingesta-demo-nodejs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Prueba de rendimiento de ingesta CSV por lotes para Oracle y PostgreSQL",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "oracledb": "^6.8.0",
+    "pg": "^8.13.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/oracledb": "^26.0.1",
+    "@types/pg": "^8.23.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3"
+  }
+}
