@@ -35,9 +35,6 @@ services:
   # ----------------------------
   # Aplicacion ingesta (Quarkus)
   # ----------------------------
-    # ----------------------------
-  # Aplicacion ingesta (Quarkus)
-  # ----------------------------
   ingesta-demo:
     image: luisenrique2025/ingesta-demo:1.0
     container_name: ingesta-demo
