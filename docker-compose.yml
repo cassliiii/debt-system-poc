@@ -116,6 +116,33 @@ networks:
     name: debt-network
     driver: bridge
 
+  # ----------------------------
+  # Aplicacion ingesta (Quarkus)
+  # ----------------------------
+    # ----------------------------
+  # Aplicacion ingesta (Quarkus)
+  # ----------------------------
+  ingesta-demo:
+    image: luisenrique2025/ingesta-demo:1.0
+    container_name: ingesta-demo
+    restart: unless-stopped
+    depends_on:
+      - oracle-area1
+      - postgresql-area2
+    ports:
+      - "8080:8080"
+    environment:
+      ORA_URL: "jdbc:oracle:thin:@//oracle-area1:1521/FREEPDB1"
+      ORA_USER: "AREA1"
+      ORA_PASS: "Area1Poc2024"
+      PG_URL: "jdbc:postgresql://postgresql-area2:5432/db_area2"
+      PG_USER: "area2_user"
+      PG_PASS: "PgArea2Secure!2024"
+      INGESTA_DIR: "/ingestas"
+      JAVA_OPTS_APPEND: "-Xms2g -Xmx2g"
+    volumes:
+      - ./ingestas:/ingestas
+
 volumes:
   oracle1_data:
     name: oracle1_data
