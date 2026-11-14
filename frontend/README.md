@@ -1,16 +1,38 @@
-# React + Vite
+# SIRD — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicación React (Vite, JavaScript) del Sistema Integrado de Reporte de Deudas.
 
-Currently, two official plugins are available:
+## Requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js 20 o superior.
+- npm.
+- Opcional: backend Express en `http://localhost:8080`.
 
-## React Compiler
+## Comandos
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm install     # instala dependencias
+npm run dev     # servidor de desarrollo en http://localhost:5173
+npm run build   # compila la aplicación en dist/
+npm run lint    # revisa el código con ESLint
+```
 
-## Expanding the ESLint configuration
+## Variables de entorno
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Copie `.env.example` a `.env` y ajuste los valores.
+
+| Variable       | Descripción                                                                 |
+| -------------- | --------------------------------------------------------------------------- |
+| `VITE_API_URL` | URL base de la API. Vacío usa el mismo origen y el proxy hacia el backend.  |
+| `VITE_USE_MOCK` | `true` usa datos simulados; `false` consume la API real.                   |
+
+El servidor de desarrollo escucha en el puerto `5173` y reenvía las rutas `/api`
+a `http://localhost:8080`.
+
+## Modo mock
+
+Con `VITE_USE_MOCK=true` los servicios de `src/services/` usan los datos de
+`src/services/mock/` en lugar de llamar al backend. Los mocks respetan la misma
+forma de respuesta que la API real, de modo que la interfaz puede desarrollarse
+sin conexión al servidor. Para volver a la API real, establezca
+`VITE_USE_MOCK=false`.
