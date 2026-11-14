@@ -8,6 +8,7 @@ import './Button.css'
  * @param {boolean} [props.disabled]
  * @param {() => void} [props.onClick]
  * @param {boolean} [props.fullWidth]
+ * @param {string} [props.className]
  * @param {import('react').ReactNode} props.children
  */
 export function Button({
@@ -16,12 +17,14 @@ export function Button({
   disabled = false,
   onClick,
   fullWidth = false,
+  className,
   children,
 }) {
-  const className = [
+  const classes = [
     'button',
     `button--${variant}`,
     fullWidth ? 'button--full' : '',
+    className,
   ]
     .filter(Boolean)
     .join(' ')
@@ -29,7 +32,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={className}
+      className={classes}
       disabled={disabled}
       onClick={onClick}
     >

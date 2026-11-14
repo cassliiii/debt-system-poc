@@ -4,6 +4,11 @@
   gap: var(--space-xs);
 }
 
+.file-dropzone-field:focus {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
 .file-dropzone {
   display: flex;
   flex-direction: column;

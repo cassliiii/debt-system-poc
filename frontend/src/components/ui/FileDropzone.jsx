@@ -10,6 +10,7 @@ const sizeFormatter = new Intl.NumberFormat('es-PE', {
 /**
  * Zona de carga de archivos con arrastrar y soltar.
  * @param {object} props
+ * @param {string} [props.id]
  * @param {string} [props.accept]
  * @param {File | null} [props.file]
  * @param {(file: File) => void} props.onFileSelect
@@ -19,6 +20,7 @@ const sizeFormatter = new Intl.NumberFormat('es-PE', {
  * @param {boolean} [props.disabled]
  */
 export function FileDropzone({
+  id,
   accept = '.csv',
   file,
   onFileSelect,
@@ -72,7 +74,11 @@ export function FileDropzone({
     .join(' ')
 
   return (
-    <div className="file-dropzone-field">
+    <div
+      id={id}
+      className="file-dropzone-field"
+      tabIndex={id ? -1 : undefined}
+    >
       <div
         className={className}
         onDragOver={handleDragOver}
@@ -87,6 +93,7 @@ export function FileDropzone({
           accept={accept}
           tabIndex={-1}
           disabled={disabled}
+          aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
           onChange={(event) => {
             const selected = event.target.files?.[0]

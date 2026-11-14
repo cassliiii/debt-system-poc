@@ -1,0 +1,34 @@
+.carga-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  max-width: 640px;
+}
+
+.carga-page__intro {
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  line-height: var(--text-body-line);
+  color: var(--color-ink-muted);
+}
+
+.carga-page__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.carga-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.carga-page__feedback:focus {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+.carga-page__total {
+  margin-top: var(--space-xxs);
+}
