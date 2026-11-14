@@ -1,0 +1,48 @@
+.debt-totals {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  width: 100%;
+  max-width: 480px;
+}
+
+.debt-totals__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  line-height: var(--text-body-line);
+}
+
+.debt-totals__row dt {
+  color: var(--color-ink-muted);
+}
+
+.debt-totals__row dd {
+  margin: 0;
+  color: var(--color-ink);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.debt-totals__row--total {
+  margin-top: var(--space-xs);
+  padding-top: var(--space-sm);
+  border-top: 2px solid var(--color-ink);
+}
+
+.debt-totals__row--total dt {
+  color: var(--color-ink);
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-strong-weight);
+  line-height: var(--text-body-strong-line);
+}
+
+.debt-totals__row--total dd {
+  color: var(--color-ink);
+  font-size: var(--text-figure-size);
+  font-weight: var(--text-figure-weight);
+  line-height: var(--text-figure-line);
+}

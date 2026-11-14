@@ -1,0 +1,93 @@
+.text-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.text-field__label {
+  font-size: var(--text-label-size);
+  font-weight: var(--text-label-weight);
+  line-height: var(--text-label-line);
+  color: var(--color-ink);
+}
+
+.text-field__required {
+  color: var(--color-error);
+}
+
+.text-field__control {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  border: 1px solid var(--color-control-border);
+  border-radius: var(--radius-xs);
+  background-color: var(--color-canvas);
+}
+
+.text-field__control:focus-within {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+.text-field__control--error {
+  border: 2px solid var(--color-error);
+  background-color: var(--color-error-bg);
+}
+
+.text-field__input {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  padding: 0 var(--space-sm);
+  border: 0;
+  border-radius: var(--radius-xs);
+  background-color: transparent;
+  color: var(--color-ink);
+  font-family: inherit;
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  line-height: var(--text-body-line);
+}
+
+.text-field__input:focus-visible {
+  outline: none;
+}
+
+.text-field__toggle {
+  height: 44px;
+  padding: 0 var(--space-sm);
+  border: 0;
+  background-color: transparent;
+  color: var(--color-primary);
+  font-family: inherit;
+  font-size: var(--text-button-size);
+  font-weight: var(--text-button-weight);
+  line-height: var(--text-button-line);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.text-field__toggle:hover {
+  color: var(--color-primary-hover);
+}
+
+.text-field__helper {
+  font-size: var(--text-helper-size);
+  font-weight: var(--text-helper-weight);
+  line-height: var(--text-helper-line);
+  color: var(--color-ink-subtle);
+}
+
+.text-field__error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  font-size: var(--text-helper-size);
+  font-weight: var(--text-helper-weight);
+  line-height: var(--text-helper-line);
+  color: var(--color-error);
+}
+
+.text-field__error svg {
+  flex-shrink: 0;
+}

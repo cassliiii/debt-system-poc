@@ -1,0 +1,12 @@
+@media print {
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+  }
+
+  header,
+  aside,
+  .no-print {
+    display: none !important;
+  }
+}

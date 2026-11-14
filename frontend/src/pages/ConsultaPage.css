@@ -1,0 +1,114 @@
+.consulta-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.consulta-page__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.consulta-page__field {
+  display: grid;
+  grid-template-columns: max-content minmax(12ch, auto);
+  align-items: center;
+  column-gap: var(--space-sm);
+  row-gap: var(--space-xs);
+}
+
+.consulta-page__field .text-field {
+  display: contents;
+}
+
+.consulta-page__field .text-field__label {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.consulta-page__field .text-field__control {
+  grid-column: 2;
+  grid-row: 1;
+  width: 12ch;
+}
+
+.consulta-page__field .text-field__helper,
+.consulta-page__field .text-field__error {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.consulta-page__submit {
+  grid-column: 2;
+  grid-row: 3;
+  justify-self: start;
+  margin-top: var(--space-xs);
+  padding-top: 0;
+}
+
+.consulta-page__result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.consulta-page__result-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+}
+
+.consulta-page__result-title {
+  font-size: var(--text-subsection-size);
+  font-weight: var(--text-subsection-weight);
+  line-height: var(--text-subsection-line);
+  color: var(--color-ink);
+}
+
+.consulta-page__result-title:focus,
+.consulta-page__empty-title:focus,
+.consulta-page__alert:focus {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+.consulta-page__result-dni {
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  line-height: var(--text-body-line);
+  color: var(--color-ink-muted);
+}
+
+.consulta-page__helper {
+  font-size: var(--text-helper-size);
+  font-weight: var(--text-helper-weight);
+  line-height: var(--text-helper-line);
+  color: var(--color-ink-subtle);
+}
+
+.consulta-page__empty {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.consulta-page__empty-title {
+  font-size: var(--text-subsection-size);
+  font-weight: var(--text-subsection-weight);
+  line-height: var(--text-subsection-line);
+  color: var(--color-ink);
+}
+
+.consulta-page__empty p {
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  line-height: var(--text-body-line);
+  color: var(--color-ink-muted);
+}
+
+.consulta-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}

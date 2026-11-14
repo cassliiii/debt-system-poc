@@ -1,0 +1,46 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xxs);
+  width: fit-content;
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+  font-size: var(--text-caption-size);
+  font-weight: var(--text-caption-weight);
+  line-height: var(--text-caption-line);
+}
+
+.chip__icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.chip--base {
+  background-color: var(--color-surface-2);
+  color: var(--color-ink);
+}
+
+.chip--interes {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.chip--vigente {
+  background-color: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.chip--por-vencer {
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.chip--vencida {
+  background-color: var(--color-error-bg);
+  color: var(--color-error);
+}
+
+.chip--coactiva {
+  background-color: var(--color-inverse-canvas);
+  color: var(--color-inverse-ink);
+}

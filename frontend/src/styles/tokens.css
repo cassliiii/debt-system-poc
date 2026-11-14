@@ -1,0 +1,109 @@
+:root {
+  /* Colores de marca y acción */
+  --color-primary: #7e1f2a;
+  --color-primary-hover: #641922;
+  --color-primary-pressed: #4b1219;
+  --color-on-primary: #ffffff;
+  --color-primary-tint: #f6e9eb;
+
+  /* Texto */
+  --color-ink: #1f2328;
+  --color-ink-muted: #4a5057;
+  --color-ink-subtle: #626971;
+
+  /* Superficies y bordes */
+  --color-canvas: #ffffff;
+  --color-surface-1: #f1f2f3;
+  --color-surface-2: #e3e5e8;
+  --color-hairline: #d0d3d6;
+  --color-control-border: #7a828a;
+  --color-inverse-canvas: #1f2328;
+  --color-inverse-ink: #ffffff;
+
+  /* Semánticos */
+  --color-success: #1e6b35;
+  --color-success-bg: #e5f2e9;
+  --color-warning: #7a4e00;
+  --color-warning-bg: #fff1cc;
+  --color-warning-border: #d9a100;
+  --color-error: #b42318;
+  --color-error-bg: #fdecea;
+  --color-info: #1f5f99;
+  --color-info-bg: #e6eff8;
+
+  /* Tipografía */
+  --text-page-title-size: 28px;
+  --text-page-title-weight: 600;
+  --text-page-title-line: 1.29;
+
+  --text-section-title-size: 22px;
+  --text-section-title-weight: 600;
+  --text-section-title-line: 1.36;
+
+  --text-subsection-size: 18px;
+  --text-subsection-weight: 600;
+  --text-subsection-line: 1.4;
+
+  --text-body-lg-size: 18px;
+  --text-body-lg-weight: 400;
+  --text-body-lg-line: 1.5;
+
+  --text-body-size: 16px;
+  --text-body-weight: 400;
+  --text-body-line: 1.5;
+
+  --text-body-strong-size: 16px;
+  --text-body-strong-weight: 600;
+  --text-body-strong-line: 1.5;
+
+  --text-label-size: 15px;
+  --text-label-weight: 600;
+  --text-label-line: 1.33;
+
+  --text-table-size: 14px;
+  --text-table-weight: 400;
+  --text-table-line: 1.43;
+
+  --text-table-head-size: 14px;
+  --text-table-head-weight: 600;
+  --text-table-head-line: 1.43;
+
+  --text-helper-size: 14px;
+  --text-helper-weight: 400;
+  --text-helper-line: 1.43;
+
+  --text-caption-size: 13px;
+  --text-caption-weight: 400;
+  --text-caption-line: 1.38;
+
+  --text-button-size: 15px;
+  --text-button-weight: 600;
+  --text-button-line: 1.33;
+
+  --text-figure-size: 24px;
+  --text-figure-weight: 600;
+  --text-figure-line: 1.25;
+
+  --text-system-name-size: 16px;
+  --text-system-name-weight: 600;
+  --text-system-name-line: 1.25;
+
+  /* Radios */
+  --radius-none: 0px;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+
+  /* Espaciados */
+  --space-xxs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-xxl: 48px;
+
+  /* Elevación y estructura */
+  --shadow-modal: 0 8px 24px rgba(31, 35, 40, 0.2);
+  --sidebar-width: 240px;
+  --header-height: 64px;
+}
