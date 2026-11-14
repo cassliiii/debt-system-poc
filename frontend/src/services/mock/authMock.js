@@ -15,7 +15,7 @@ const wait = (milliseconds) =>
 /**
  * Inicio de sesión simulado.
  * @param {{ usuario: string, password: string }} credentials
- * @returns {Promise<{ usuario: string, nombre: string, rol: string }>}
+ * @returns {Promise<{ usuario: string, nombre: string, rol: string, area: string | null }>}
  */
 export async function login({ usuario, password }) {
   await wait(600)
@@ -48,5 +48,6 @@ export async function login({ usuario, password }) {
     usuario: user.usuario,
     nombre: user.nombre,
     rol: user.rol,
+    area: user.area ?? null,
   }
 }

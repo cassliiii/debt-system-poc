@@ -27,6 +27,11 @@
   line-height: var(--text-body-strong-line);
 }
 
+.alert__title:focus {
+  outline: 3px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
 .alert__action {
   margin-top: var(--space-xs);
 }

@@ -25,12 +25,14 @@ const ROLES = {
  * @param {object} props
  * @param {'info' | 'success' | 'warning' | 'error'} [props.variant]
  * @param {string} [props.title]
+ * @param {import('react').Ref<HTMLParagraphElement>} [props.titleRef]
  * @param {import('react').ReactNode} [props.children]
  * @param {import('react').ReactNode} [props.action]
  */
 export function Alert({
   variant = 'info',
   title,
+  titleRef,
   children,
   action,
 }) {
@@ -45,7 +47,15 @@ export function Alert({
         aria-hidden="true"
       />
       <div className="alert__content">
-        {title ? <p className="alert__title">{title}</p> : null}
+        {title ? (
+          <p
+            ref={titleRef}
+            className="alert__title"
+            tabIndex={titleRef ? -1 : undefined}
+          >
+            {title}
+          </p>
+        ) : null}
         {children ? <div className="alert__text">{children}</div> : null}
         {action ? <div className="alert__action">{action}</div> : null}
       </div>

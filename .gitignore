@@ -176,4 +176,4 @@ pruebas-ingesta/java-quarkus/ingesta-demo/data/*.csv
 __pycache__/
 *.pyc
 pruebas-ingesta/python/ingesta_demo/data/*.csv
-pruebas-ingesta/python/out/
+pruebas-ingesta/python/out/ingestas/

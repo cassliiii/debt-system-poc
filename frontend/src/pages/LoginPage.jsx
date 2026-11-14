@@ -175,7 +175,8 @@ export function LoginPage() {
         </p>
         {USE_MOCK ? (
           <p className="login-page__demo">
-            Modo demostración: atencion / demo1234 · operador / demo1234
+            Modo demostración: atencion / demo1234 · operador1 / demo1234 ·
+            operador2 / demo1234
           </p>
         ) : null}
         <p className="visually-hidden" role="status" aria-live="polite">

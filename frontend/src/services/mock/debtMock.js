@@ -1,5 +1,5 @@
-import { AREAS } from '../../config/areas.js'
-import { REQUIRED_COLUMNS } from '../../config/csvContract.js'
+import { getAreaByCode } from '../../config/areas.js'
+import { getRequiredColumns } from '../../config/csvContract.js'
 import { isValidDni } from '../../utils/validators.js'
 import { adaptConsulta } from '../debtService.js'
 import { ApiError } from '../errors.js'
@@ -62,7 +62,7 @@ export async function getDebtByDni(dni) {
  * @returns {Promise<{ success: boolean, message: string, totalRegistros: number }>}
  */
 export async function uploadCsv({ area, file }) {
-  if (!AREAS.some((item) => item.value === area)) {
+  if (!getAreaByCode(area)) {
     throw new ApiError(400, 'El área seleccionada no es válida.')
   }
 
@@ -85,7 +85,7 @@ export async function uploadCsv({ area, file }) {
     .map((header) => header.trim().replace(/^"|"$/g, ''))
   const normalizedHeaders = headers.map((header) => header.toLowerCase())
 
-  const missingColumns = REQUIRED_COLUMNS.filter(
+  const missingColumns = getRequiredColumns(area).filter(
     (column) => !normalizedHeaders.includes(column),
   )
 

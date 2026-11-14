@@ -1,37 +1,30 @@
-# AGENTS.md — Frontend del Sistema Integrado de Reporte de Deudas (SIRD)
+## Áreas y roles
 
-## Proyecto
+- Roles: atencion (consulta de deuda, sin área) y operador (carga de CSV de UNA sola área, asignada a su usuario).
+- Un operador NUNCA elige el área: se toma de la sesión (user.area). El frontend envía a la ingesta el código de su área.
+- Códigos de área: AREA1 (Oracle, area1.deudas, Fiscalización presencial, Sede Central) y AREA2 (PostgreSQL, area2.deudas, Fiscalización electrónica, Sede Norte). La consulta devuelve el área como BD_Area1 o BD_Area2: ambas formas se normalizan en src/config/areas.js.
+- Usuarios demo (mock): atencion, operador1 (AREA1), operador2 (AREA2), todos con clave demo1234.
 
-Aplicación React (Vite, JavaScript) para el sistema de reporte de deudas de papeletas. Reemplaza un portal HTML estático. El backend (Express 5, carpeta ../backend) ya existe y NO se modifica desde esta carpeta.
+## Backends vigentes (se ignoran el backend Node/BigQuery y el OpenAPI de ingesta)
 
-## Reglas obligatorias
+### consulta-service (puerto 8080, proxy /api)
 
-1. Trabaja solo dentro de frontend/. No toques backend/, sql/, docs/, Dockerfile, docker-compose.yml ni .github/ salvo petición explícita.
-2. No cambies contratos de API ni lógica de negocio. El frontend solo muestra y envía datos. No recalcules totales de deuda: se muestran tal como llegan.
-3. Diseño: sigue DESIGN.md al pie de la letra. Todos los colores, tamaños, espaciados y radios salen de variables CSS definidas en src/styles/tokens.css. Prohibido: degradados, sombras (salvo el modal), esquinas de más de 2px (4px solo en el modal), emojis, etiquetas en mayúsculas, un segundo color de marca, centrar bloques de texto.
-4. Una sola acción primaria (botón granate) por pantalla.
-5. Tecnología: React + Vite + JavaScript con JSDoc para describir contratos. CSS puro, un archivo .css junto a cada componente. Sin Tailwind, sin librerías de UI, sin CDN ni recursos externos (despliegue on-premise sin internet; las fuentes vienen de @fontsource).
-6. Nunca uses dangerouslySetInnerHTML ni innerHTML. Todo dato del backend se renderiza como texto.
-7. Todo acceso HTTP pasa por src/services/. Los componentes y páginas no llaman a fetch directamente.
-8. Modo mock: con VITE_USE_MOCK=true los servicios usan src/services/mock/. Los mocks respetan exactamente la forma de las respuestas del backend real.
-9. Textos de interfaz en español formal (trato de usted), sin exclamaciones ni emojis. Fechas dd/mm/aaaa. Importes con Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).
-10. Accesibilidad (WCAG 2.1 AA): etiquetas visibles, foco visible, el estado se comunica con palabra + icono + color, aria-live para mensajes dinámicos, todo operable con teclado.
-11. Rutas con HashRouter (el servidor Express no tiene fallback para rutas del SPA).
-12. Antes de dar una tarea por terminada ejecuta npm run lint y npm run build.
+- GET /api/debt/consulta/{dni} (8 dígitos). 200: { success, data: { dni, nombre, deuda_base_total, interes_total, deuda_total, fecha_actualizacion, detalle: [{ area, num_papeleta, tipo_monto, concepto, monto, estado, fecha_vencimiento }] } }. 400 DNI inválido; 404 sin registros; 500 error con error y details.
+- GET /api/debt/health
 
-## Áreas
+### ingesta-demo (host 8081, contenedor 8080, proxy /ingestas)
 
-BD_Area1 = Fiscalización presencial (Sede Central). BD_Area2 = Fiscalización electrónica (Sede Norte). Los valores BD_Area1 y BD_Area2 se envían tal cual al backend y no se cambian.
+- POST /ingestas: multipart con archivo (CSV) y area (AREA1 | AREA2). 202 con cabecera Location y cuerpo con el estado. 400 sin archivo o área inválida; 429 con 2 cargas activas; 500 si no se puede guardar el archivo.
+- GET /ingestas/{jobId}: { jobId, estado, filasTotales, insertadas, rechazadas, porcentaje }. Estados: EN_COLA, EN_PROCESO, COMPLETADO, FALLIDO. 404 si el job no existe o expiró (los jobs viven en memoria y expiran 30 minutos después del último acceso).
+- GET /ingestas/{jobId}/cuarentena: CSV con las filas rechazadas (por validación o por la base de datos). 404 si no existe; 409 si el job no terminó.
+- Si faltan columnas obligatorias, el POST responde 202 y el job termina en FALLIDO sin mensaje: el frontend valida la cabecera antes de subir.
+- 23 columnas obligatorias por área, mapeadas por nombre de cabecera; las columnas extra se ignoran. Límite del backend: 500 MB.
+- No deduplica ni trunca: subir el mismo archivo dos veces duplica las deudas.
+- procesados = insertadas + rechazadas.
 
-## Contratos del backend (vigentes)
+## Variables de entorno
 
-- GET /api/health -> { status, message }
-- POST /api/debt/upload (multipart): file (CSV, máx. 5 MB, solo .csv) y area (BD_Area1 | BD_Area2). 200: { success, message, totalRegistros }. 400: { message, errors?: string[] }. 500: { message, details }.
-- GET /api/debt/consulta/:dni (dni = 8 dígitos). 200: { success, data: { dni, nombre, deuda_base_total, interes_total, deuda_total, detalle: [{ area, num_papeleta, tipo_monto, concepto, monto }] } }. 400 DNI inválido; 404 sin registros; 500 error.
-- CSV que exige el backend hoy (por nombre de cabecera, cualquier orden): dni, nombre, num_papeleta, tipo_monto, monto, concepto. Este contrato CAMBIARÁ al migrar el backend a on-premise: mantenlo aislado en src/config/csvContract.js y en la función adaptadora de src/services/debtService.js.
-
-## Roles (simulados por ahora)
-
-- atencion (Atención al ciudadano) -> /consulta
-- operador (Operador de área) -> /carga
-  No hay administrador ni gestión de roles.
+- VITE_USE_MOCK: servicios de consulta (false = real).
+- VITE_USE_MOCK_INGESTA: servicio de ingesta (true = mock, false = real). Por defecto true hasta integrar.
+- VITE_INGESTA_BASE_URL (vacío = mismo origen con proxy) y VITE_MAX_UPLOAD_MB (500).
+- La autenticación es siempre mock (el backend no tiene login).

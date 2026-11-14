@@ -1,4 +1,5 @@
 import { APP_NAME, ENTIDAD } from '../../config/app.js'
+import { getAreaByCode } from '../../config/areas.js'
 import { ROLES } from '../../config/navigation.js'
 import { useAuth } from '../../hooks/useAuth.js'
 import './AppHeader.css'
@@ -6,6 +7,13 @@ import './AppHeader.css'
 export function AppHeader() {
   const { user, logout } = useAuth()
   const roleLabel = user ? (ROLES[user.rol] ?? user.rol) : ''
+  const area = user?.area ? getAreaByCode(user.area) : null
+  const userName =
+    user?.rol === 'operador' && area
+      ? `${user.nombre}, ${roleLabel} · ${area.shortLabel}`
+      : user
+        ? `${user.nombre}, ${roleLabel}`
+        : ''
 
   return (
     <header className="app-header">
@@ -18,9 +26,7 @@ export function AppHeader() {
       </div>
       {user ? (
         <div className="app-header__user">
-          <span className="app-header__user-name">
-            {user.nombre}, {roleLabel}
-          </span>
+          <span className="app-header__user-name">{userName}</span>
           <button
             type="button"
             className="app-header__logout"
