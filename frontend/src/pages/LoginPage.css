@@ -1,0 +1,5 @@
+.login-page {
+  width: 100%;
+  max-width: 640px;
+  padding: var(--space-xl) var(--space-lg);
+}

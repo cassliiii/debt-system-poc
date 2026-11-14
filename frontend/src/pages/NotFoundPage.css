@@ -1,0 +1,13 @@
+.not-found-page {
+  width: 100%;
+  max-width: 1200px;
+  padding: var(--space-lg);
+}
+
+.not-found-page__text {
+  margin-bottom: var(--space-md);
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-weight);
+  line-height: var(--text-body-line);
+  color: var(--color-ink);
+}
