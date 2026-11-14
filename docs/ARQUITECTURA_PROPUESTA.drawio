@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e" pages="3">
     <diagram name="Arquitectura Demo" id="KfcEHTzryJxlTHyONUFP">
-        <mxGraphModel dx="1278" dy="793" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+        <mxGraphModel dx="1587" dy="792" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -397,113 +397,92 @@
         </mxGraphModel>
     </diagram>
     <diagram id="a1-on-premise-oracle-postgres" name="Arquitectura On-Premise (Oracle + PostgreSQL)">
-        <mxGraphModel dx="1251" dy="1081" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="900" math="0" shadow="0">
+        <mxGraphModel dx="1386" dy="945" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1240" pageHeight="560" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="a1-title" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#333333;" value="Arquitectura On-Premise — Sistema Integrado de Reporte de Deudas (Oracle + PostgreSQL, Java/Quarkus)" vertex="1">
-                    <mxGeometry height="26" width="900" x="60" y="10" as="geometry"/>
+                <mxCell id="mQTnXDyMDxyGblehejfb-22" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#333333;" value="Arquitectura On-Premise — Oracle + PostgreSQL (Java/Quarkus)" vertex="1">
+                    <mxGeometry height="26" width="700" x="130" y="160" as="geometry"/>
                 </mxCell>
-                <mxCell id="a1-env" parent="1" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;strokeColor=#666666;fillColor=none;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;fontColor=#666666;fontSize=13;fontStyle=1;" value="Entorno on-premise — docker-compose.yml (red interna / mismo host)" vertex="1">
-                    <mxGeometry height="760" width="1200" x="50" y="45" as="geometry"/>
+                <mxCell id="mQTnXDyMDxyGblehejfb-23" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=light-dark(#666666,#FFFFFF);fillColor=none;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;fontColor=#666666;fontSize=12;fontStyle=1;" value="&lt;div&gt;&lt;br/&gt;&lt;/div&gt;" vertex="1">
+                    <mxGeometry height="440" width="990" x="130" y="200" as="geometry"/>
                 </mxCell>
-                <mxCell id="a1-lbl-consulta" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=#56517e;fillColor=#d0cee2;align=center;verticalAlign=middle;rounded=0;" value="CONSULTA DE DEUDA" vertex="1">
-                    <mxGeometry height="30" width="160" x="80" y="65" as="geometry"/>
+                <mxCell id="mQTnXDyMDxyGblehejfb-24" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=#56517e;fillColor=#d0cee2;align=center;verticalAlign=middle;rounded=0;fontSize=12;fontStyle=1;" value="CONSULTA DE DEUDA" vertex="1">
+                    <mxGeometry height="26" width="170" x="155" y="235" as="geometry"/>
                 </mxCell>
-                <mxCell id="a1-panel-consulta" parent="1" style="fillColor=#F6F6F6;strokeColor=#555555;shadow=0;gradientColor=none;fontSize=14;align=left;spacing=10;fontColor=#717171;verticalAlign=top;spacingTop=-4;fontStyle=0;spacingLeft=40;html=1;container=0;" value="" vertex="1">
-                    <mxGeometry height="300" width="1160" x="80" y="105" as="geometry"/>
+                <mxCell id="mQTnXDyMDxyGblehejfb-25" parent="1" style="shape=actor;whiteSpace=wrap;html=1;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontSize=11;" value="Usuario" vertex="1">
+                    <mxGeometry height="50" width="34" x="170" y="315" as="geometry"/>
                 </mxCell>
-                <mxCell id="a1-actor-consulta" parent="1" style="shape=actor;whiteSpace=wrap;html=1;align=center;verticalLabelPosition=bottom;verticalAlign=top;" value="Atención al&lt;br&gt;ciudadano" vertex="1">
-                    <mxGeometry height="60" width="40" x="110" y="220" as="geometry"/>
+                <mxCell id="mQTnXDyMDxyGblehejfb-26" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="Frontend&lt;br&gt;React + Vite" vertex="1">
+                    <mxGeometry height="60" width="150" x="260" y="310" as="geometry"/>
                 </mxCell>
-                <mxCell id="a1-frontend" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="Frontend Web&lt;br&gt;React + Vite&lt;br&gt;(puerto 5173)" vertex="1">
-                    <mxGeometry height="80" width="160" x="230" y="200" as="geometry"/>
-                </mxCell>
-                <mxCell id="a1-e-actor-frontend" edge="1" parent="1" source="a1-actor-consulta" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="a1-frontend" value="Ingresa DNI">
+                <mxCell id="mQTnXDyMDxyGblehejfb-27" edge="1" parent="1" source="mQTnXDyMDxyGblehejfb-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;defaultLabelBackgroundColor=page;" target="mQTnXDyMDxyGblehejfb-26" value="DNI">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="a1-consulta-svc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" value="consulta-service&lt;br&gt;Java 21 + Quarkus&lt;br&gt;backend/consulta-service&lt;br&gt;(puerto 8080)" vertex="1">
-                    <mxGeometry height="100" width="220" x="480" y="190" as="geometry"/>
+                <mxCell id="mQTnXDyMDxyGblehejfb-28" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" value="consulta-service&lt;br&gt;Java 21 + Quarkus" vertex="1">
+                    <mxGeometry height="70" width="200" x="550" y="305" as="geometry"/>
                 </mxCell>
-                <mxCell id="a1-e-frontend-svc" edge="1" parent="1" source="a1-frontend" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.35;exitDx=0;exitDy=0;entryX=0;entryY=0.35;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="a1-consulta-svc" value="GET /api/debt/consulta/{dni}&lt;br&gt;(proxy Vite → :8080)">
+                <mxCell id="mQTnXDyMDxyGblehejfb-29" edge="1" parent="1" source="mQTnXDyMDxyGblehejfb-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=classic;startFill=1;fontSize=10;defaultLabelBackgroundColor=page;" target="mQTnXDyMDxyGblehejfb-28" value="GET /consulta/{dni}">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="a1-e-svc-frontend" edge="1" parent="1" source="a1-consulta-svc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;dashed=1;" target="a1-frontend" value="200 OK — JSON&lt;br&gt;(reporte consolidado)">
+                <mxCell id="mQTnXDyMDxyGblehejfb-30" edge="1" parent="1" source="mQTnXDyMDxyGblehejfb-28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=10;defaultLabelBackgroundColor=page;" target="mQTnXDyMDxyGblehejfb-41" value="SELECT (JDBC)">
                     <mxGeometry relative="1" as="geometry">
-                        <Array as="points">
-                            <mxPoint x="440" y="350"/>
-                        </Array>
+                        <mxPoint x="820" y="275" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="a1-oracle" parent="1" style="shape=cylinder;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" value="Oracle 26ai Free&lt;br&gt;contenedor oracle-area1&lt;br&gt;puerto 1521 · FREEPDB1&lt;br&gt;esquema AREA1.deudas" vertex="1">
-                    <mxGeometry height="110" width="180" x="850" y="110" as="geometry"/>
-                </mxCell>
-                <mxCell id="a1-postgres" parent="1" style="shape=cylinder;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="PostgreSQL 16&lt;br&gt;contenedor postgresql-area2&lt;br&gt;puerto host 5429 → 5432&lt;br&gt;esquema area2.deudas" vertex="1">
-                    <mxGeometry height="110" width="180" x="850" y="290" as="geometry"/>
-                </mxCell>
-                <mxCell id="a1-e-svc-oracle" edge="1" parent="1" source="a1-consulta-svc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="a1-oracle" value="SELECT ... FROM area1.deudas&lt;br&gt;WHERE nro_documento = ? (JDBC)">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="a1-e-svc-postgres" edge="1" parent="1" source="a1-consulta-svc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="a1-postgres" value="SELECT ... FROM area2.deudas&lt;br&gt;WHERE nro_documento = ? (JDBC)">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="a1-merge" parent="1" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=6;" value="Une en memoria (Java) las filas de&lt;br&gt;Oracle + PostgreSQL por nro_documento.&lt;br&gt;Calcula deuda_base_total, interes_total&lt;br&gt;y deuda_total. No hay una sola query&lt;br&gt;SQL federada: la unión es a nivel de&lt;br&gt;aplicación, no de base de datos." vertex="1">
-                    <mxGeometry height="100" width="260" x="480" y="330" as="geometry"/>
-                </mxCell>
-                <mxCell id="a1-e-svc-merge" edge="1" parent="1" source="a1-consulta-svc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;startArrow=none;endArrow=none;dashed=1;strokeColor=#999999;" target="a1-merge" value="">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="a1-lbl-ingesta" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=#10739e;fillColor=#b1ddf0;align=center;verticalAlign=middle;rounded=0;" value="INGESTA DE CSV" vertex="1">
-                    <mxGeometry height="30" width="160" x="80" y="430" as="geometry"/>
-                </mxCell>
-                <mxCell id="a1-panel-ingesta" parent="1" style="fillColor=#F6F6F6;strokeColor=#555555;shadow=0;gradientColor=none;fontSize=14;align=left;spacing=10;fontColor=#717171;verticalAlign=top;spacingTop=-4;fontStyle=0;spacingLeft=40;html=1;container=0;" value="" vertex="1">
-                    <mxGeometry height="320" width="1160" x="80" y="470" as="geometry"/>
-                </mxCell>
-                <mxCell id="a1-ingesta-container" parent="1" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;strokeColor=#999999;fillColor=none;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;fontColor=#999999;fontStyle=2;fontSize=11;" value="ingesta-service (Java) — backend/ingesta-service · lógica a definir, fuera de alcance de esta tarea" vertex="1">
-                    <mxGeometry height="150" width="420" x="220" y="550" as="geometry"/>
-                </mxCell>
-                <mxCell id="a1-excel" parent="1" style="shape=image;html=1;verticalAlign=top;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;imageAspect=0;aspect=fixed;image=https://icons.diagrams.net/assets/files/1/Excel.svg;labelPerimeter=1;" value="" vertex="1">
-                    <mxGeometry height="32" width="26" x="118" y="585" as="geometry"/>
-                </mxCell>
-                <mxCell id="a1-actor-ingesta" parent="1" style="shape=actor;whiteSpace=wrap;html=1;align=center;verticalLabelPosition=bottom;verticalAlign=top;" value="Operador de área" vertex="1">
-                    <mxGeometry height="60" width="40" x="110" y="640" as="geometry"/>
-                </mxCell>
-                <mxCell id="a1-rh-formato" parent="1" style="rhombus;whiteSpace=wrap;html=1;shapeInside=1;rounded=1;fontSize=11;" value="¿Formato correcto?" vertex="1">
-                    <mxGeometry height="80" width="130" x="250" y="620" as="geometry"/>
-                </mxCell>
-                <mxCell id="a1-e-actor-formato" edge="1" parent="1" source="a1-actor-ingesta" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="a1-rh-formato" value="Sube CSV&lt;br&gt;(Área 1 o Área 2)">
-                    <mxGeometry relative="1" as="geometry"/>
-                </mxCell>
-                <mxCell id="a1-e-formato-actor" edge="1" parent="1" source="a1-rh-formato" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="a1-actor-ingesta" value="NO — rechaza con&lt;br&gt;detalle de errores">
+                <mxCell id="mQTnXDyMDxyGblehejfb-31" edge="1" parent="1" source="mQTnXDyMDxyGblehejfb-28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=10;defaultLabelBackgroundColor=page;" target="mQTnXDyMDxyGblehejfb-42" value="SELECT (JDBC)">
                     <mxGeometry relative="1" as="geometry">
-                        <Array as="points">
-                            <mxPoint x="315" y="590"/>
-                            <mxPoint x="130" y="590"/>
-                        </Array>
+                        <mxPoint x="820" y="415" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="a1-rh-area" parent="1" style="rhombus;whiteSpace=wrap;html=1;shapeInside=1;rounded=1;fontSize=11;" value="¿Área 1 o Área 2?" vertex="1">
-                    <mxGeometry height="80" width="160" x="460" y="620" as="geometry"/>
+                <mxCell id="mQTnXDyMDxyGblehejfb-32" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=#10739e;fillColor=#b1ddf0;align=center;verticalAlign=middle;rounded=0;fontSize=12;fontStyle=1;" value="INGESTA DE CSV" vertex="1">
+                    <mxGeometry height="26" width="170" x="155" y="490" as="geometry"/>
                 </mxCell>
-                <mxCell id="a1-e-formato-area" edge="1" parent="1" source="a1-rh-formato" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;defaultLabelBackgroundColor=page;" target="a1-rh-area" value="SI">
+                <mxCell id="mQTnXDyMDxyGblehejfb-33" parent="1" style="shape=actor;whiteSpace=wrap;html=1;align=center;verticalLabelPosition=bottom;verticalAlign=top;fontSize=11;" value="Operador" vertex="1">
+                    <mxGeometry height="50" width="34" x="170" y="550" as="geometry"/>
+                </mxCell>
+                <mxCell id="mQTnXDyMDxyGblehejfb-34" parent="1" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=#b0e3e6;strokeColor=#0e8088;fontSize=12;" value="ingesta-service&lt;br&gt;(fuera de alcance)" vertex="1">
+                    <mxGeometry height="60" width="190" x="270" y="545" as="geometry"/>
+                </mxCell>
+                <mxCell id="mQTnXDyMDxyGblehejfb-35" edge="1" parent="1" source="mQTnXDyMDxyGblehejfb-33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=#000000;fontSize=10;fontColor=light-dark(#FFFFFF,#111111);defaultLabelBackgroundColor=page;" target="mQTnXDyMDxyGblehejfb-34" value="">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="a1-e-area-oracle" edge="1" parent="1" source="a1-rh-area" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="a1-oracle" value="Área 1 → INSERT&lt;br&gt;area1.deudas (JDBC)">
-                    <mxGeometry relative="1" as="geometry">
-                        <Array as="points">
-                            <mxPoint x="900" y="470"/>
-                        </Array>
+                <mxCell id="mQTnXDyMDxyGblehejfb-36" connectable="0" parent="mQTnXDyMDxyGblehejfb-35" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];inheritText=fontFamily,fontSize,fontStyle,textOpacity,labelBorderColor,labelBorderWidth,labelBackgroundColor,defaultLabelBackgroundColor,labelPadding;fontSize=10;fontColor=light-dark(#000000,#FFFFFF);defaultLabelBackgroundColor=page;" value="CSV" vertex="1">
+                    <mxGeometry relative="1" x="-0.1691" y="-1" as="geometry">
+                        <mxPoint as="offset"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="a1-e-area-postgres" edge="1" parent="1" source="a1-rh-area" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;defaultLabelBackgroundColor=page;" target="a1-postgres" value="Área 2 → INSERT&lt;br&gt;area2.deudas (JDBC)">
-                    <mxGeometry relative="1" as="geometry">
+                <mxCell id="mQTnXDyMDxyGblehejfb-37" parent="1" style="rhombus;whiteSpace=wrap;html=1;shapeInside=1;rounded=1;dashed=1;strokeColor=#0e8088;fontSize=10;fillColor=#b0e3e6;" value="¿Área 1 o Área 2?" vertex="1">
+                    <mxGeometry height="60" width="130" x="520" y="545" as="geometry"/>
+                </mxCell>
+                <mxCell id="mQTnXDyMDxyGblehejfb-38" edge="1" parent="1" source="mQTnXDyMDxyGblehejfb-34" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;strokeColor=default;fontSize=10;fontColor=#999999;defaultLabelBackgroundColor=page;" target="mQTnXDyMDxyGblehejfb-37">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="mQTnXDyMDxyGblehejfb-39" edge="1" parent="1" source="mQTnXDyMDxyGblehejfb-37" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=1.006;entryY=0.451;entryDx=0;entryDy=0;dashed=1;strokeColor=default;fontSize=10;fontColor=light-dark(#000000,#FFFFFF);defaultLabelBackgroundColor=page;entryPerimeter=0;" value="Área 1 → INSERT">
+                    <mxGeometry relative="1" x="-0.0914" as="geometry">
+                        <mxPoint as="offset"/>
                         <Array as="points">
-                            <mxPoint x="930" y="500"/>
+                            <mxPoint x="585" y="540"/>
+                            <mxPoint x="1070" y="540"/>
+                            <mxPoint x="1070" y="270.6"/>
                         </Array>
+                        <mxPoint x="970.9000000000001" y="270.5899999999999" as="targetPoint"/>
                     </mxGeometry>
                 </mxCell>
-                <mxCell id="a1-note" parent="1" style="text;html=1;whiteSpace=wrap;align=left;verticalAlign=middle;fontColor=#666666;fontSize=12;" value="Nota: Oracle y PostgreSQL son motores distintos en contenedores distintos (sin link/dblink entre ellos). No existe una sola sentencia SQL que una ambas áreas: la fusión de filas y el cálculo de totales para el reporte se hace en código, dentro de consulta-service (Java)." vertex="1">
-                    <mxGeometry height="40" width="1100" x="80" y="815" as="geometry"/>
+                <mxCell id="mQTnXDyMDxyGblehejfb-40" edge="1" parent="1" source="mQTnXDyMDxyGblehejfb-37" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;dashed=1;strokeColor=default;fontSize=10;fontColor=light-dark(#000000,#FFFFFF);defaultLabelBackgroundColor=page;" value="Área 2 → INSERT">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="650" y="610"/>
+                            <mxPoint x="895" y="610"/>
+                        </Array>
+                        <mxPoint x="895" y="460.0000000000001" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="mQTnXDyMDxyGblehejfb-41" parent="1" style="shape=datastore;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" value="ORACLE&lt;div&gt;area1.deudas&lt;/div&gt;" vertex="1">
+                    <mxGeometry height="70" width="110" x="860" y="245" as="geometry"/>
+                </mxCell>
+                <mxCell id="mQTnXDyMDxyGblehejfb-42" parent="1" style="shape=datastore;whiteSpace=wrap;html=1;fillColor=#cce5ff;strokeColor=#36393d;" value="PostgreSQL&lt;div&gt;area2.deudas&lt;/div&gt;" vertex="1">
+                    <mxGeometry height="70" width="110" x="840" y="385" as="geometry"/>
                 </mxCell>
             </root>
         </mxGraphModel>
