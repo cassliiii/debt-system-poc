@@ -51,7 +51,7 @@ services:
   # Aplicacion ingesta (Quarkus)
   # ----------------------------
   ingesta-java:
-    image: luisenrique2025/ingesta-demo:1.1
+    image: luisenrique2025/ingesta-demo:1.2
     container_name: ingesta-java
     restart: unless-stopped
     depends_on:
