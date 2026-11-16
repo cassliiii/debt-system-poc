@@ -624,6 +624,132 @@ Memoria: heap pico de 1,2 a 1,4 GB de los 2 GB reservados, con 9 a 11 recoleccio
 ¿Se cumplió el objetivo de menos de 1 minuto sin saturar la máquina?
 Tiempo: sí, con lotes. 15,6 a 21,1 s para 500.000 filas. Sin lotes, con 12 hilos fila por fila, tomó 98 a 118 s, así que ese modo no lo cumple.
 
+
+## 13.2. Validación a escala completa en PostgreSQL: Área 2
+
+A diferencia de las pruebas anteriores de esta sección, que utilizaron Oracle para el Área 1, esta validación se ejecutó contra PostgreSQL para el Área 2. Se mantuvieron los parámetros principales de la estrategia por lotes: 500.000 filas por corrida, 12 hilos, `nowait` y lotes de 1.000 registros.
+
+### Comando de ejecución
+
+```powershell
+PS D:\8vo Ciclo\SW\debt-system-poc\pruebas-ingesta\java-quarkus\ingesta-demo> java -Xms2g -Xmx2g -jar target/quarkus-app/quarkus-run.jar --csv "D:\8vo Ciclo\SW\ingesta-demo\data\BD_Area2.csv" --area AREA2 --max-rows 500000 --commit-mode nowait --threads 12 --batch-size 1000 --run-id a2_500k_t12_b1000 --latencias
+```
+
+### Resultados de las tres corridas
+
+**Corrida 1**
+
+```text
+20:39:26.298  Inicio corrida a2_500k_t12_b1000 | area=AREA2 motor=postgresql hilos=12 commit=nowait csv=D:\8vo Ciclo\SW\ingesta-demo\data\BD_Area2.csv (167.4 MB)
+20:39:26.546  Modo de commit: NOWAIT en cada sesion de trabajador
+20:39:26.674  12 conexiones establecidas en 105.7 ms
+20:39:28.011  Progreso: 50000 filas procesadas por la BD
+20:39:28.798  Progreso: 100000 filas procesadas por la BD
+20:39:29.536  Progreso: 150000 filas procesadas por la BD
+20:39:30.640  Progreso: 200000 filas procesadas por la BD
+20:39:31.496  Progreso: 250000 filas procesadas por la BD
+20:39:32.301  Progreso: 300000 filas procesadas por la BD
+20:39:33.073  Progreso: 350000 filas procesadas por la BD
+20:39:33.767  Progreso: 400000 filas procesadas por la BD
+20:39:34.566  Progreso: 450000 filas procesadas por la BD
+20:39:35.273  Progreso: 500000 filas procesadas por la BD
+20:39:35.414  ---- RESUMEN ----
+20:39:35.414  Filas: total=500000 insertadas=500000 rech.validacion=0 rech.bd=0
+20:39:35.414  Tiempo total (reloj): 8.60 s | lectura=5522 ms validacion=1858 ms | insert acumulado (suma de hilos)=35221 ms | cuarentena acumulada=0 ms
+20:39:35.414  Throughput: 58161 filas/s total | 58161 filas/s insertadas | hilos=12
+20:39:35.414  Latencia INSERT (us): p50=0 p95=0 p99=0 max=0
+20:39:35.415  Lotes: tamano=1000 total=503 con_fallback=0 | latencia lote (us): p50=54591 p95=148242 p99=403702
+20:39:35.416  JVM: heap pico=1070 MB, GC=10 (139 ms), CPU proceso=29203 ms
+20:39:35.416  Verificacion COUNT(*): antes=0 despues=500000 -> OK
+```
+
+**Corrida 2**
+
+```text
+20:39:41.940  Inicio corrida a2_500k_t12_b1000 | area=AREA2 motor=postgresql hilos=12 commit=nowait csv=D:\8vo Ciclo\SW\ingesta-demo\data\BD_Area2.csv (167.4 MB)
+20:39:42.223  Modo de commit: NOWAIT en cada sesion de trabajador
+20:39:42.304  12 conexiones establecidas en 66.5 ms
+20:39:43.796  Progreso: 50000 filas procesadas por la BD
+20:39:44.615  Progreso: 100000 filas procesadas por la BD
+20:39:45.335  Progreso: 150000 filas procesadas por la BD
+20:39:46.182  Progreso: 200000 filas procesadas por la BD
+20:39:47.244  Progreso: 250000 filas procesadas por la BD
+20:39:48.171  Progreso: 300000 filas procesadas por la BD
+20:39:48.878  Progreso: 350000 filas procesadas por la BD
+20:39:49.639  Progreso: 400000 filas procesadas por la BD
+20:39:50.364  Progreso: 450000 filas procesadas por la BD
+20:39:50.983  Progreso: 500000 filas procesadas por la BD
+20:39:51.215  ---- RESUMEN ----
+20:39:51.215  Filas: total=500000 insertadas=500000 rech.validacion=0 rech.bd=0
+20:39:51.215  Tiempo total (reloj): 8.68 s | lectura=5671 ms validacion=1679 ms | insert acumulado (suma de hilos)=38524 ms | cuarentena acumulada=0 ms
+20:39:51.215  Throughput: 57617 filas/s total | 57617 filas/s insertadas | hilos=12
+20:39:51.217  Latencia INSERT (us): p50=0 p95=0 p99=0 max=0
+20:39:51.219  Lotes: tamano=1000 total=504 con_fallback=0 | latencia lote (us): p50=55083 p95=166724 p99=457441
+20:39:51.220  JVM: heap pico=1072 MB, GC=10 (105 ms), CPU proceso=30516 ms
+20:39:51.221  Verificacion COUNT(*): antes=500000 despues=1000000 -> OK
+```
+
+**Corrida 3**
+
+```text
+20:39:57.557  Inicio corrida a2_500k_t12_b1000 | area=AREA2 motor=postgresql hilos=12 commit=nowait csv=D:\8vo Ciclo\SW\ingesta-demo\data\BD_Area2.csv (167.4 MB)
+20:39:57.839  Modo de commit: NOWAIT en cada sesion de trabajador
+20:39:57.959  12 conexiones establecidas en 110.4 ms
+20:39:59.341  Progreso: 50000 filas procesadas por la BD
+20:40:00.113  Progreso: 100000 filas procesadas por la BD
+20:40:00.803  Progreso: 150000 filas procesadas por la BD
+20:40:01.517  Progreso: 200000 filas procesadas por la BD
+20:40:02.220  Progreso: 250000 filas procesadas por la BD
+20:40:03.035  Progreso: 300000 filas procesadas por la BD
+20:40:03.701  Progreso: 350000 filas procesadas por la BD
+20:40:04.468  Progreso: 400000 filas procesadas por la BD
+20:40:05.164  Progreso: 450000 filas procesadas por la BD
+20:40:05.812  Progreso: 500000 filas procesadas por la BD
+20:40:05.948  ---- RESUMEN ----
+20:40:05.948  Filas: total=500000 insertadas=500000 rech.validacion=0 rech.bd=0
+20:40:05.949  Tiempo total (reloj): 7.85 s | lectura=5313 ms validacion=1423 ms | insert acumulado (suma de hilos)=35894 ms | cuarentena acumulada=0 ms
+20:40:05.949  Throughput: 63678 filas/s total | 63678 filas/s insertadas | hilos=12
+20:40:05.949  Latencia INSERT (us): p50=0 p95=0 p99=0 max=0
+20:40:05.950  Lotes: tamano=1000 total=502 con_fallback=0 | latencia lote (us): p50=56394 p95=205259 p99=293077
+20:40:05.950  JVM: heap pico=1366 MB, GC=10 (112 ms), CPU proceso=28422 ms
+20:40:05.950  Verificacion COUNT(*): antes=1000000 despues=1500000 -> OK
+```
+
+### Resumen de métricas
+
+| Corrida | Filas previas | Tiempo total | Throughput | Lotes | Latencia lote p50 | p95 | p99 | Heap pico |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | 0 | 8,60 s | 58.161 filas/s | 503 | 54,6 ms | 148,2 ms | 403,7 ms | 1.070 MB |
+| 2 | 500.000 | 8,68 s | 57.617 filas/s | 504 | 55,1 ms | 166,7 ms | 457,4 ms | 1.072 MB |
+| 3 | 1.000.000 | 7,85 s | 63.678 filas/s | 502 | 56,4 ms | 205,3 ms | 293,1 ms | 1.366 MB |
+
+Las tres corridas procesaron 500.000 filas cada una. El tiempo acumulado fue de 25,13 s para 1.500.000 filas, equivalente a un throughput agregado aproximado de 59.690 filas/s. El promedio aritmético de los throughputs reportados por corrida fue de aproximadamente 59.819 filas/s.
+
+### Interpretación
+
+**Integridad de los datos.** Las tres corridas insertaron las 500.000 filas previstas, sin rechazos de validación ni errores de base de datos. La verificación `COUNT(*)` fue correcta en todos los casos: pasó de 0 a 500.000, luego a 1.000.000 y finalmente a 1.500.000 registros. Por tanto, las pruebas confirman la ingesta correcta y acumulativa en PostgreSQL para el Área 2.
+
+**Rendimiento.** Los tiempos se mantuvieron entre 7,85 y 8,68 segundos por cada 500.000 filas, con un throughput entre 57.617 y 63.678 filas/s. La tercera corrida fue la más rápida. La variación observada entre las tres ejecuciones es relativamente acotada, aunque estas mediciones por sí solas no permiten establecer un rendimiento universal ni descartar variaciones del entorno.
+
+**Distribución del trabajo.** La lectura y la validación sumaron entre 6,74 y 7,38 segundos por corrida. El tiempo acumulado de inserción reportado como suma de los hilos fue de 35,2 a 38,5 segundos; no debe confundirse con el tiempo de reloj, porque corresponde a la suma del trabajo concurrente de los 12 trabajadores.
+
+**Lotes y latencia.** Se procesaron lotes de tamaño 1.000, con 502 a 504 lotes reportados por corrida y sin fallback. La latencia p50 de lote se mantuvo alrededor de 55–56 ms. El p95 varió entre 148 y 205 ms y el p99 entre 293 y 457 ms. La métrica `Latencia INSERT` aparece en cero porque, al trabajar por lotes y no producirse fallback a inserciones individuales, no se registraron latencias de INSERT fila por fila; la métrica relevante en estas corridas es la latencia de lote.
+
+**Recursos de la JVM.** El heap pico estuvo entre 1.070 y 1.366 MB, con 10 recolecciones de GC por corrida y pausas acumuladas de 105 a 139 ms. El consumo de CPU del proceso Java fue de 28,4 a 30,5 segundos por corrida.
+
+**Acumulación de registros.** Las corridas 2 y 3 se ejecutaron sobre una tabla que ya contenía 500.000 y 1.000.000 de filas, respectivamente. Aun así, no se observa una caída del throughput en esta pequeña muestra: la tercera corrida fue la más rápida. No obstante, como solo se realizaron tres ejecuciones y no se controlaron otras variables del entorno, no corresponde concluir que el tamaño de la tabla carezca de efecto.
+
+**Identificación de las ejecuciones.** Se reutilizó el mismo `--run-id` (`a2_500k_t12_b1000`) en las tres corridas. Para conservar los archivos de métricas de cada ejecución sin riesgo de sobrescritura, conviene asignar un identificador diferente a cada repetición.
+
+### Conclusión de la prueba en PostgreSQL (Área 2)
+
+La estrategia de inserción por lotes de 1.000 registros, con 12 hilos y modo `nowait`, completó correctamente tres cargas consecutivas de 500.000 filas en PostgreSQL. El tiempo por corrida fue inferior a 9 segundos y el throughput reportado superó las 57.000 filas/s, sin rechazos ni fallos de verificación.
+
+Este resultado valida el funcionamiento de la estrategia a escala completa para el Área 2. Debe mantenerse separado de los resultados de Oracle del Área 1: son motores y conjuntos de datos distintos, por lo que estas cifras no constituyen por sí solas una comparación controlada entre PostgreSQL y Oracle.
+
+---
+
+
 ## 14. Conclusión general de la demostración
 Conclusión general de la demo (Área 1, Oracle, 500.000 filas)
 | Configuración | Tiempo | Filas/s | Respeta “1 a 1” |
